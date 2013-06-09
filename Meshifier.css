@@ -1,0 +1,50 @@
+
+body {
+  background: #000;
+  color: #ddd;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+	padding:0;
+	margin:0;
+	overflow:hidden;
+}
+
+p {
+  color: #eee;
+}
+
+a {
+    color: #ddd;
+}
+
+a:link {
+    color: #ddd;
+} 
+
+a:visited {
+    color: #ddd;
+}
+
+a:hover {
+    color: #fff;
+}
+
+#toolbar {
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 1px;
+    padding: 6px;
+    background-color: #222;
+}
+
+.panel {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 1px;
+    padding: 6px;
+    border-width: 1px;    
+    border-color: #444;
+}
