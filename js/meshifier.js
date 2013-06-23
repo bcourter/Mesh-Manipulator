@@ -18,12 +18,12 @@ function init() {
     window.addEventListener('resize', onWindowResize, false);
 
     var Settings = function () {
-		this.show4DExplode = document.getElementById("show4dExplode");
-		this.is4DExplode = document.getElementById("is4dExplode");
+		this.show4dExplode = document.getElementById("show4dExplode");
+		this.is4dExplode = document.getElementById("is4dExplode");
 		this.showHyperbolic = document.getElementById("showHyperbolic")
 		this.isHyperbolic = document.getElementById("isHyperbolic");
 
-        this.show4DExplode.onclick = panelRefresh;
+        this.show4dExplode.onclick = panelRefresh;
         this.showHyperbolic.onclick = panelRefresh;
         document.getElementById("saveObj").onclick = saveObj;
     };
@@ -32,6 +32,21 @@ function init() {
         this.explode = document.getElementById("4dExplodePanel");
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
+
+	materials = [
+		new THREE.MeshLambertMaterial( { 
+			color: 0x222222, 
+			side: THREE.DoubleSide,
+			shading: THREE.FlatShading, 
+			transparent: true,  
+			opacity: 0.5
+		} ),
+		new THREE.MeshBasicMaterial( { 
+			color: 0xEEEEEE, 
+			shading: THREE.FlatShading, 
+			wireframe: true
+		} )
+	];
 
     var loader = new THREE.OBJLoader();
     loader.addEventListener('load', function (event) {
@@ -67,7 +82,7 @@ function init() {
 }
 
 function panelRefresh() {
-	panels.explode.hidden = !settings.show4DExplode.checked;
+	panels.explode.hidden = !settings.show4dExplode.checked;
 	panels.hyperbolic.hidden = !settings.showHyperbolic.checked;
 }
 
@@ -95,12 +110,12 @@ function render() {
 
     var scene = new THREE.Scene();
 
-	if (settings.is4DExplode.checked) {
-    	newModel = tool4DExplode.method(objModel, time);
+	if (settings.is4dExplode.checked) {
+    	newModel = tool4dExplode.method(objModel, time);
 	} 
 
 	else if (settings.isHyperbolic.checked) {
-    	newModel = tool4DExplode.method(objModel, time);
+    	newModel = toolHyperbolic.method(objModel, time);
 	}
 
 	else 

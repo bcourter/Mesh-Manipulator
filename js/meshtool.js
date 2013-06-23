@@ -1,9 +1,24 @@
 var MeshTool = function (name, method) {
     this.name = name;
     this.method = method;
+
+	this.materials = [
+		new THREE.MeshLambertMaterial( { 
+			color: 0x222222, 
+			side: THREE.DoubleSide,
+			shading: THREE.FlatShading, 
+			transparent: true,  
+			opacity: 0.5
+		} ),
+		new THREE.MeshBasicMaterial( { 
+			color: 0xEEEEEE, 
+			shading: THREE.FlatShading, 
+			wireframe: true
+		} )
+	];
 };
 
-var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
+var tool4dExplode = new MeshTool("4d Explode", function (objModel, time) {
     var newModel = new THREE.Object3D();
 
     var translate = new FOUR.Matrix5().makeTranslation(0, 0, 0, 0);
@@ -56,21 +71,6 @@ var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
                 geometry.faces.push(face);
             }
 
-			var materials = [
-				new THREE.MeshLambertMaterial( { 
-					color: 0x222222, 
-					side: THREE.DoubleSide,
-					shading: THREE.FlatShading, 
-					transparent: true,  
-					opacity: 0.5
-				} ),
-				new THREE.MeshBasicMaterial( { 
-					color: 0xEEEEEE, 
-					shading: THREE.FlatShading, 
-					wireframe: true
-				} )
-			];
-
 			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
 		}
 	});
@@ -78,7 +78,50 @@ var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
     return newModel;
 });
 
-var toolIdentity = new MeshTool("4D Explode", function (objModel, time) {
+var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
+	var offset = 0;
+    var geometry = new THREE.Geometry();
+    objModel.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            var vertices = child.geometry.vertices;
+            for (var i = 0, il = vertices.length; i < il; i++) {
+                var sumSq = (1 + vertices[i].lengthSq())
+                var vertex = vertices[i].clone();
+                geometry.vertices.push(vertex);
+            }
+
+            var faces = child.geometry.faces;
+            for (var i = 0, il = faces.length; i < il; i++) {
+                var a = faces[i].a;
+                var b = faces[i].b;
+                var c = faces[i].c;
+                var d = faces[i].d;
+
+                var face;
+                if (d === undefined)
+                    face = new THREE.Face3(a + offset, b + offset, c + offset, null, faces[i].color, faces[i].materialIndex);
+                else
+                    face = new THREE.Face4(a + offset, b + offset, c + offset, d + offset, null, faces[i].color, faces[i].materialIndex);
+
+                geometry.faces.push(face);
+            }
+
+			offset += child.geometry.vertices.length;
+		}
+	});
+
+    disc = new Disc(new Region(4, 5), 0.995, 22, geometry);
+
+    var newModel = new THREE.Object3D();
+
+    for (var i = 0, il = disc.geometries.length; i < il; i++) {
+		newModel.add(THREE.SceneUtils.createMultiMaterialObject(disc.geometries[i], materials));
+	}
+
+    return newModel;
+});
+
+var toolIdentity = new MeshTool("4d Explode", function (objModel, time) {
     var newModel = new THREE.Object3D();
 
     objModel.traverse(function (child) {
@@ -96,21 +139,6 @@ var toolIdentity = new MeshTool("4D Explode", function (objModel, time) {
             for (var i = 0, il = faces.length; i < il; i++) {
                 geometry.faces.push(faces[i]);
             }
-
-			var materials = [
-				new THREE.MeshLambertMaterial( { 
-					color: 0x222222, 
-					side: THREE.DoubleSide,
-					shading: THREE.FlatShading, 
-					transparent: true,  
-					opacity: 0.5
-				} ),
-				new THREE.MeshBasicMaterial( { 
-					color: 0xEEEEEE, 
-					shading: THREE.FlatShading, 
-					wireframe: true
-				} )
-			];
 
 			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
 		}
