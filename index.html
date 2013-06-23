@@ -4,13 +4,17 @@
 <head>
     <meta charset="utf-8">
     <title>Fractal Jig</title>
-    <link rel="stylesheet" href="meshifier.css" />
+    <link rel="stylesheet" href="Meshifier.css" />
 </head>
 <body>
     <div id="toolbar">
         <label>
-            <input type="checkbox" id='4dExplode' />
+            <input type="checkbox" id='show4dExplode' />
             4D Explode
+        </label>
+        <label>
+            <input type="checkbox" id='showHyperbolic' />
+            Hyperbolic
         </label>
         <label>
             <input type="button" id='saveObj' />
@@ -20,8 +24,15 @@
 
     <div id="4dExplodePanel" class="panel">
         <label>
-            <input type="button" id='Button1' title="Save OBJ" />
-            Save OBJ
+            <input type="checkbox" id='is4dExplode' />
+            4D Explode
+        </label>
+    </div>
+
+    <div id="hyperbolicPanel" class="panel">
+        <label>
+            <input type="checkbox" id='isHyperbolic' />
+            Hyperbolic
         </label>
     </div>
 

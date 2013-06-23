@@ -56,9 +56,65 @@ var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
                 geometry.faces.push(face);
             }
 
-            newModel.add(new THREE.Mesh(geometry, child.material));
-        }
-    });
+			var materials = [
+				new THREE.MeshLambertMaterial( { 
+					color: 0x222222, 
+					side: THREE.DoubleSide,
+					shading: THREE.FlatShading, 
+					transparent: true,  
+					opacity: 0.5
+				} ),
+				new THREE.MeshBasicMaterial( { 
+					color: 0xEEEEEE, 
+					shading: THREE.FlatShading, 
+					wireframe: true
+				} )
+			];
+
+			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+		}
+	});
+
+    return newModel;
+});
+
+var toolIdentity = new MeshTool("4D Explode", function (objModel, time) {
+    var newModel = new THREE.Object3D();
+
+    objModel.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            var geometry = new THREE.Geometry();
+
+            var vertices = child.geometry.vertices;
+            for (var i = 0, il = vertices.length; i < il; i++) {
+                var sumSq = (1 + vertices[i].lengthSq())
+                var vertex = vertices[i].clone();
+                geometry.vertices.push(vertex);
+            }
+
+            var faces = child.geometry.faces;
+            for (var i = 0, il = faces.length; i < il; i++) {
+                geometry.faces.push(faces[i]);
+            }
+
+			var materials = [
+				new THREE.MeshLambertMaterial( { 
+					color: 0x222222, 
+					side: THREE.DoubleSide,
+					shading: THREE.FlatShading, 
+					transparent: true,  
+					opacity: 0.5
+				} ),
+				new THREE.MeshBasicMaterial( { 
+					color: 0xEEEEEE, 
+					shading: THREE.FlatShading, 
+					wireframe: true
+				} )
+			];
+
+			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+		}
+	});
 
     return newModel;
 });
