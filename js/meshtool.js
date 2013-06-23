@@ -4,7 +4,7 @@ var MeshTool = function (name, method) {
 };
 
 var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
-    var newModel = objModel.clone();
+    var newModel = new THREE.Object3D();
 
     var translate = new FOUR.Matrix5().makeTranslation(0, 0, 0, 0);
     var trans = new FOUR.Matrix5().makeRotationWX(time * 0.03);
@@ -12,12 +12,11 @@ var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
     var trans3 = new FOUR.Matrix5().makeRotationZW(time * 0.02);
     trans = trans2.multiply(trans).multiply(translate);
 
-    newModel.traverse(function (child) {
+    objModel.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
-            var geometry = child.geometry;
+            var geometry = new THREE.Geometry();
 
-            var vertices = geometry.vertices;
-            var newVertices = [];
+            var vertices = child.geometry.vertices;
             for (var i = 0, il = vertices.length; i < il; i++) {
                 var sumSq = (1 + vertices[i].lengthSq())
                 var vertex = vertices[i].clone();
@@ -29,12 +28,10 @@ var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
                 var newVertex = new THREE.Vector3(vertex4.x, vertex4.y, vertex4.z);
                 newVertex = newVertex.divideScalar(vertex4.w);  // stereographic
                 newVertex = newVertex.divideScalar(vertex.lengthSq());  // inversion
-                newVertices.push(newVertex);
+                geometry.vertices.push(newVertex);
             }
-            geometry.vertices = newVertices;
 
-            var faces = geometry.faces;
-            geometry.faces = [];
+            var faces = child.geometry.faces;
             for (var i = 0, il = faces.length; i < il; i++) {
                 var a = faces[i].a;
                 var b = faces[i].b;
@@ -58,6 +55,8 @@ var tool4DExplode = new MeshTool("4D Explode", function (objModel, time) {
 
                 geometry.faces.push(face);
             }
+
+            newModel.add(new THREE.Mesh(geometry, child.material));
         }
     });
 

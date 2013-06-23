@@ -52,7 +52,7 @@ function init() {
         });
     });
 
-    loader.load("resources/obj/jig.obj");
+    loader.load("resources/obj/sheep.obj");
 
     settings = new Settings();
     panels = new Panels();
@@ -82,7 +82,7 @@ function render() {
 
     var scene = new THREE.Scene();
 
-    var newModel = tool4DExplode.method(objModel, time);
+    newModel = tool4DExplode.method(objModel, time);
     scene.add(newModel);
 
     var ambientLight = new THREE.AmbientLight(0x666666);
@@ -106,7 +106,7 @@ function show4dExplode() {
 }
 
 function saveObj() {
-    var mesh = jigMesh;
+    var mesh = newModel;
     var op = THREE.saveGeometryToObj(mesh);
 
     var newWindow = window.open("");
