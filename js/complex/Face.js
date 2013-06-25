@@ -62,7 +62,9 @@ Face.create = function (region, geometry) {
         face.edges[i] = edge.transform(rotation);
        
     	var newGeom = geom.clone(); 
+    	var newGeomC = geom.clone(); 
  		var newVertices = newGeom.vertices;
+ 		var newVerticesC = newGeomC.vertices;
 
 		for (var j = 0; j < vertices.length; j++) {
 			var z = new Complex([vertices[j].x, vertices[j].y]);
@@ -70,27 +72,11 @@ Face.create = function (region, geometry) {
 			z = z.transform(rotation);
 
 			newVertices[j] = new THREE.Vector3(z.data[0], z.data[1], vertices[j].z);
-		//	newVertices[j + vertices.length] = new THREE.Vector3(zc.data[0], zc.data[1], vertices[j].z);
-		}
-
- 		var newFaces = newGeom.faces;
-		var offset = newFaces.length;
-		for (var j = 0; j < offset; j++) {
-            var a = newFaces[j].a;
-            var b = newFaces[j].b;
-            var c = newFaces[j].c;
-            var d = newFaces[j].d;
-
-            var meshface;
-            if (d === undefined)
-                meshface = new THREE.Face3(a + offset, b + offset, c + offset, null, newFaces[j].color, newFaces[j].materialIndex);
-            else
-                meshface = new THREE.Face4(a + offset, b + offset, c + offset, d + offset, null, newFaces[j].color, newFaces[j].materialIndex);
-
-	//		newFaces[j + newFaces.length] = meshface;
+			newVerticesC[j] = new THREE.Vector3(zc.data[0], zc.data[1], vertices[j].z);
 		}
 
         face.geometries.push(newGeom);
+        face.geometries.push(newGeomC);
     }
 
     return face;
