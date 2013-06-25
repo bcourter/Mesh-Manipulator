@@ -31,22 +31,12 @@ Face.create = function (region, geometry) {
     var increment = Mobius.createRotation(2 * Math.PI / p);
     var midvertex = region.p1;
     
-    var zDist = region.p2.data[0];
-    var hDist = Math.log((1+zDist) / (1-zDist));
-    
     var geom = geometry.clone(); 
 	geom.computeBoundingBox();
 	var offset = geom.boundingBox.max.sub(geom.boundingBox.min);
 
  	var vertices = geom.vertices;
     for (var i = 0; i < vertices.length; i++) {
-    	var z = vertices[i].z;
-    	var rHyp = hDist * Math.sqrt(vertices[i].x*vertices[i].x + vertices[i].y*vertices[i].y);
-    	var dir = new THREE.Vector3(vertices[i].x, vertices[i].y, 0).normalize();
-    	var eRHyp = Math.exp(rHyp);
-    //	var rZ = (eRHyp - 1)/(eRHyp + 1);
-    //	vertices[i] = dir.multiplyScalar(rZ);
-    	vertices[i].z = z;
 		vertices[i].x += offset.x/2;
 		vertices[i].y += offset.y/2;
     }
@@ -94,9 +84,15 @@ Face.prototype.transform = function (mobius) {
 		var geom = this.geometries[j].clone(); 
 	 	var vertices = geom.vertices;
 		for (var i = 0; i < vertices.length; i++) {
+			var x = vertices[i].x;
+			var y = vertices[i].y;
 			var z = vertices[i].z;
+			var r = Math.sqrt(x * x + y * y);
+
 			vertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
-			vertices[i].z = z;
+    		vertices[i].z = Math.max(0, z * (1 - r * r));
+			
+
 		}
 		
 		var p = this.region.p;

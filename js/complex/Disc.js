@@ -8,7 +8,8 @@ function Disc(region, circleLimit, maxRegions, geometry) {
     
 	this.geometries = [];
     this.initialFace = Face.create(region, geometry); //.transform(Mobius.createDiscAutomorphism(new Complex([0.001, 0.001]), 0));
-    this.geometries = this.geometries.concat(this.initialFace.geometries);
+    this.initialFace = this.initialFace.transform(Mobius.identity);
+	this.geometries = this.geometries.concat(this.initialFace.geometries);
 	
    	this.faces = [this.initialFace];
 

@@ -110,7 +110,7 @@ var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
 	});
 
    // disc = new Disc(new Region(3, 7), 0.995, 22, geometry);
-    disc = new Disc(new Region(3, 7), 0.995, 4, geometry);
+    disc = new Disc(new Region(3, 7), 0.995, 66, geometry);
 
     var newModel = new THREE.Object3D();
 
