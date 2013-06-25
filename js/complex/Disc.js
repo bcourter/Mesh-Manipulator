@@ -8,18 +8,14 @@ function Disc(region, circleLimit, maxRegions, geometry) {
     
 	this.geometries = [];
     this.initialFace = Face.create(region, geometry); //.transform(Mobius.createDiscAutomorphism(new Complex([0.001, 0.001]), 0));
-    for (var i = 0; i < this.initialFace.geometries.length; i++) {
-		this.geometries.push (this.initialFace.geometries[i]);
- 	}
+    this.geometries = this.geometries.concat(this.initialFace.geometries);
 	
-	
-
    	this.faces = [this.initialFace];
 
     this.drawCount = 1;
     this.totalDraw = 0;
 
-  //  this.initFaces(this.geometries);
+    this.geometries = this.initFaces(this.geometries);
 }
 
 Disc.prototype.initFaces = function (geometries) {
@@ -62,7 +58,7 @@ Disc.prototype.initFaces = function (geometries) {
      //           continue;
 
             this.faces.push(image);
-            geometries.push(image.geometry);
+            geometries = geometries.concat(image.geometries);
             faceQueue.unshift(image);
             faceCenters.add(image.center);
             count++;
@@ -71,6 +67,7 @@ Disc.prototype.initFaces = function (geometries) {
     }
 
     this.circleMaxModulus = faceCenters.max;
+	return geometries;
 };
 
 var backgroundColor = null;

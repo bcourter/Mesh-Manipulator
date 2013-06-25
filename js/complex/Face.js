@@ -19,12 +19,11 @@ function Region(p, q) {
 }
 
 
-function Face(region, center, geometry, isFlipped) {
+function Face(region, center, geometries, isFlipped) {
     this.region = region;
     this.center = center;
-    this.geometry = geometry;
+	this.geometries = geometries;
     this.isFlipped = isFlipped;
-	this.geometries = [];
 }
 
 Face.create = function (region, geometry) {
@@ -52,7 +51,8 @@ Face.create = function (region, geometry) {
 		vertices[i].y += offset.y/2;
     }
     
-    var face = new Face(region, Complex.zero, geom, false);
+	this.geometries = [];
+    var face = new Face(region, Complex.zero, this.geometries, false);
 
     var edge = new Edge(this, region.c, midvertex, midvertex.transform(increment.inverse()));
     face.edges = [];
@@ -82,44 +82,54 @@ Face.create = function (region, geometry) {
     return face;
 };
 
-Face.createFromExisting = function (previous, edges, center, geometry, isFlipped) {
-    var face = new Face(previous.region, center, geometry, isFlipped);
+Face.createFromExisting = function (previous, edges, center, geometries, isFlipped) {
+    var face = new Face(previous.region, center, geometries, isFlipped);
     face.edges = edges;
     return face;
 };
 
 Face.prototype.transform = function (mobius) {
-	var geom = this.geometry.clone(); 
- 	var vertices = geom.vertices;
-    for (var i = 0; i < vertices.length; i++) {
-    	var z = vertices[i].z;
-		vertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
-    	vertices[i].z = z;
-    }
-    
-    var p = this.region.p;
-    var edges = [p];
-   	for (var i = 0; i < p; i++) {
-        edges[i] = this.edges[i].transform(mobius);
+	var geoms = [];
+	for (var j = 0; j < this.geometries.length; j++) {
+		var geom = this.geometries[j].clone(); 
+	 	var vertices = geom.vertices;
+		for (var i = 0; i < vertices.length; i++) {
+			var z = vertices[i].z;
+			vertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
+			vertices[i].z = z;
+		}
+		
+		var p = this.region.p;
+		var edges = [];
+	   	for (var i = 0; i < p; i++) {
+		    edges[i] = this.edges[i].transform(mobius);
+		}
+    	
+		geoms.push(geom);
 	}
-    
-    return Face.createFromExisting(this, edges, this.center.transform(mobius), geom, this.isFlipped);
+
+    return Face.createFromExisting(this, edges, this.center.transform(mobius), geoms, this.isFlipped);
 };
 
 Face.prototype.conjugate = function () {
-  	var geom = this.geometry.clone(); 
- 	var vertices = geom.vertices;
-    for (var i = 0; i < vertices.length; i++) {
-//		vertices[i] = new THREE.Vector3(vertices[i].x, -vertices[i].y, vertices[i].z);
-    }
+ 	var geoms = [];
+	for (var j = 0; j < this.geometries.length; j++) {
+		var geom = this.geometries[j].clone(); 
+	 	var vertices = geom.vertices;
+		for (var i = 0; i < vertices.length; i++) {
+			vertices[i] = new THREE.Vector3(vertices[i].x, -vertices[i].y, vertices[i].z);
+		}
 
-    var p = this.region.p;
-    var edges = [p];
-    for (var i = 0; i < p; i++) {
-        edges[i] = this.edges[i].conjugate();
-    }
+		var p = this.region.p;
+		var edges = [];
+		for (var i = 0; i < p; i++) {
+		    edges[i] = this.edges[i].conjugate();
+		}
 
-    return Face.createFromExisting(this, edges, this.center.conjugate(), this.geometry, !this.isFlipped);
+		geoms.push(geom);
+	}
+
+    return Face.createFromExisting(this, edges, this.center.conjugate(), geoms, !this.isFlipped);
 };
 
 function Edge(Face, Circline, start, end) {
