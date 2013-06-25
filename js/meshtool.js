@@ -85,8 +85,7 @@ var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
         if (child instanceof THREE.Mesh) {
             var vertices = child.geometry.vertices;
             for (var i = 0, il = vertices.length; i < il; i++) {
-                var sumSq = (1 + vertices[i].lengthSq())
-                var vertex = vertices[i].clone();
+                 var vertex = vertices[i].clone();
                 geometry.vertices.push(vertex);
             }
 
@@ -110,7 +109,8 @@ var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
 		}
 	});
 
-    disc = new Disc(new Region(4, 5), 0.995, 22, geometry);
+   // disc = new Disc(new Region(3, 7), 0.995, 22, geometry);
+    disc = new Disc(new Region(3, 7), 0.995, 4, geometry);
 
     var newModel = new THREE.Object3D();
 

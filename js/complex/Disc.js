@@ -7,15 +7,19 @@ function Disc(region, circleLimit, maxRegions, geometry) {
     this.radiusLimit = 1E-4;
     
 	this.geometries = [];
-    this.initialFace = Face.create(region, geometry, this.geometries); //.transform(Mobius.createDiscAutomorphism(new Complex([0.001, 0.001]), 0));
-	this.geometries.push(this.initialFace.geometry);
- 
+    this.initialFace = Face.create(region, geometry); //.transform(Mobius.createDiscAutomorphism(new Complex([0.001, 0.001]), 0));
+    for (var i = 0; i < this.initialFace.geometries.length; i++) {
+		this.geometries.push (this.initialFace.geometries[i]);
+ 	}
+	
+	
+
    	this.faces = [this.initialFace];
 
     this.drawCount = 1;
     this.totalDraw = 0;
 
-    this.initFaces(this.geometries);
+  //  this.initFaces(this.geometries);
 }
 
 Disc.prototype.initFaces = function (geometries) {

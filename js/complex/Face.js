@@ -24,9 +24,10 @@ function Face(region, center, geometry, isFlipped) {
     this.center = center;
     this.geometry = geometry;
     this.isFlipped = isFlipped;
+	this.geometries = [];
 }
 
-Face.create = function (region, geometry, geometries) {
+Face.create = function (region, geometry) {
     var p = region.p;
     var increment = Mobius.createRotation(2 * Math.PI / p);
     var midvertex = region.p1;
@@ -35,29 +36,61 @@ Face.create = function (region, geometry, geometries) {
     var hDist = Math.log((1+zDist) / (1-zDist));
     
     var geom = geometry.clone(); 
+	geom.computeBoundingBox();
+	var offset = geom.boundingBox.max.sub(geom.boundingBox.min);
+
  	var vertices = geom.vertices;
     for (var i = 0; i < vertices.length; i++) {
     	var z = vertices[i].z;
     	var rHyp = hDist * Math.sqrt(vertices[i].x*vertices[i].x + vertices[i].y*vertices[i].y);
     	var dir = new THREE.Vector3(vertices[i].x, vertices[i].y, 0).normalize();
     	var eRHyp = Math.exp(rHyp);
-    	var rZ = (eRHyp - 1)/(eRHyp + 1);
-    	vertices[i] = dir.multiplyScalar(rZ);
+    //	var rZ = (eRHyp - 1)/(eRHyp + 1);
+    //	vertices[i] = dir.multiplyScalar(rZ);
     	vertices[i].z = z;
+		vertices[i].x += offset.x/2;
+		vertices[i].y += offset.y/2;
     }
     
     var face = new Face(region, Complex.zero, geom, false);
 
     var edge = new Edge(this, region.c, midvertex, midvertex.transform(increment.inverse()));
-    face.edges = [p];
+    face.edges = [];
     var rotation = Mobius.identity;
     for (var i = 0; i < p; i++) {
-        face.edges[i] = edge.transform(rotation);
         rotation = Mobius.multiply(rotation, increment);
-        
-        var geom = new THREE.SphereGeometry(0.01);
-      //  geometries.push(geom);
+        face.edges[i] = edge.transform(rotation);
+       
+    	var newGeom = geom.clone(); 
+ 		var newVertices = newGeom.vertices;
 
+		for (var j = 0; j < vertices.length; j++) {
+			var z = new Complex([vertices[j].x, vertices[j].y]);
+			var zc = z.conjugate().transform(rotation);
+			z = z.transform(rotation);
+
+			newVertices[j] = new THREE.Vector3(z.data[0], z.data[1], vertices[j].z);
+		//	newVertices[j + vertices.length] = new THREE.Vector3(zc.data[0], zc.data[1], vertices[j].z);
+		}
+
+ 		var newFaces = newGeom.faces;
+		var offset = newFaces.length;
+		for (var j = 0; j < offset; j++) {
+            var a = newFaces[j].a;
+            var b = newFaces[j].b;
+            var c = newFaces[j].c;
+            var d = newFaces[j].d;
+
+            var meshface;
+            if (d === undefined)
+                meshface = new THREE.Face3(a + offset, b + offset, c + offset, null, newFaces[j].color, newFaces[j].materialIndex);
+            else
+                meshface = new THREE.Face4(a + offset, b + offset, c + offset, d + offset, null, newFaces[j].color, newFaces[j].materialIndex);
+
+	//		newFaces[j + newFaces.length] = meshface;
+		}
+
+        face.geometries.push(newGeom);
     }
 
     return face;

@@ -64,7 +64,8 @@ function init() {
             if (child instanceof THREE.Mesh) {
                 var mesh = child;
                 var center = box.center();
-                var scale = box.size().length() * 0.5;
+          //      var scale = box.size().length() * 0.5;
+                var scale = 1;
 
                 var vertices = mesh.geometry.vertices;
                 for (var i = 0; i < vertices.length; i++) {  
@@ -74,7 +75,7 @@ function init() {
         });
     });
 
-    loader.load("resources/obj/sheep.obj");
+    loader.load("resources/obj/kleinquartic-meshlab.obj");
 
     settings = new Settings();
     panels = new Panels();
