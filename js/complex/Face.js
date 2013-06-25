@@ -26,6 +26,7 @@ function Face(region, center, geometries, isFlipped) {
     this.isFlipped = isFlipped;
 }
 
+var origVertices;
 Face.create = function (region, geometry) {
     var p = region.p;
     var increment = Mobius.createRotation(2 * Math.PI / p);
@@ -35,14 +36,14 @@ Face.create = function (region, geometry) {
 	geom.computeBoundingBox();
 	var offset = geom.boundingBox.max.sub(geom.boundingBox.min);
 
- 	var vertices = geom.vertices;
-    for (var i = 0; i < vertices.length; i++) {
-		vertices[i].x += offset.x/2;
-		vertices[i].y += offset.y/2;
+    for (var i = 0; i < geom.vertices.length; i++) {
+		geom.vertices[i].x += offset.x/2;
+		geom.vertices[i].y += offset.y/2;
     }
     
 	this.geometries = [];
     var face = new Face(region, Complex.zero, this.geometries, false);
+ 	origVertices = geom.vertices;
 
     var edge = new Edge(this, region.c, midvertex, midvertex.transform(increment.inverse()));
     face.edges = [];
@@ -56,13 +57,13 @@ Face.create = function (region, geometry) {
  		var newVertices = newGeom.vertices;
  		var newVerticesC = newGeomC.vertices;
 
-		for (var j = 0; j < vertices.length; j++) {
-			var z = new Complex([vertices[j].x, vertices[j].y]);
+		for (var j = 0; j < geom.vertices.length; j++) {
+			var z = new Complex([geom.vertices[j].x, geom.vertices[j].y]);
 			var zc = z.conjugate().transform(rotation);
 			z = z.transform(rotation);
 
-			newVertices[j] = new THREE.Vector3(z.data[0], z.data[1], vertices[j].z);
-			newVerticesC[j] = new THREE.Vector3(zc.data[0], zc.data[1], vertices[j].z);
+			newVertices[j] = new THREE.Vector3(z.data[0], z.data[1], geom.vertices[j].z);
+			newVerticesC[j] = new THREE.Vector3(zc.data[0], zc.data[1], geom.vertices[j].z);
 		}
 
         face.geometries.push(newGeom);
@@ -90,9 +91,7 @@ Face.prototype.transform = function (mobius) {
 			var r = Math.sqrt(x * x + y * y);
 
 			vertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
-    		vertices[i].z = Math.max(0, z * (1 - r * r));
-			
-
+    		vertices[i].z = Math.max(0, origVertices[i].z * (1 - r * r));
 		}
 		
 		var p = this.region.p;

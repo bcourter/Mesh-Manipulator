@@ -143,39 +143,49 @@ function render() {
 }
 
 function saveObj() {
-    var mesh = newModel;
-    var op = THREE.saveGeometryToObj(mesh);
+    var op = THREE.saveToObj(newModel);
 
     var newWindow = window.open("");
     newWindow.document.write(op);
 }
 
-THREE.saveGeometryToObj = function (geo) {
-    var nums = geo.length;
-    geo.updateMatrixWorld();
+THREE.saveToObj = function (object3d) {
     var s = '';
+	var offset = 1;
 
-    for (i = 0; i < geo.geometry.vertices.length; i++) {
-        var vector = new THREE.Vector3(geo.geometry.vertices[i].x, geo.geometry.vertices[i].y, geo.geometry.vertices[i].z);
-        geo.matrixWorld.multiplyVector3(vector);
+    object3d.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            var mesh = child;
 
-        s += 'v ' + (vector.x) + ' ' +
-        vector.y + ' ' +
-        vector.z + '<br />';
-    }
+			var nums = mesh.length;
+			var geometry = mesh.geometry;
+			mesh.updateMatrixWorld();
 
-    for (i = 0; i < geo.geometry.faces.length; i++) {
-        s += 'f ' +
-            (geo.geometry.faces[i].a + 1) + ' ' +
-            (geo.geometry.faces[i].b + 1) + ' ' +
-            (geo.geometry.faces[i].c + 1)
-        ;
+			for (i = 0; i < geometry.vertices.length; i++) {
+				var vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
+				mesh.matrixWorld.multiplyVector3(vector);
 
-        if (geo.geometry.faces[i].d !== undefined) {
-            s += ' ' + (geo.geometry.faces[i].d + 1);
-        }
-        s += '<br />';
-    }
+				s += 'v ' + (vector.x) + ' ' +
+				vector.y + ' ' +
+				vector.z + '<br />';
+			}
+
+			for (i = 0; i < geometry.faces.length; i++) {
+				s += 'f ' +
+				    (geometry.faces[i].a + offset) + ' ' +
+				    (geometry.faces[i].b + offset) + ' ' +
+				    (geometry.faces[i].c + offset)
+				;
+
+				if (geometry.faces[i].d !== undefined) {
+				    s += ' ' + (geometry.faces[i].d + offset);
+				}
+				s += '<br />';
+			}
+
+			offset += geometry.vertices.length;
+		}
+	});
 
     return s;
 }
