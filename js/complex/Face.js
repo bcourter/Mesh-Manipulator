@@ -91,7 +91,8 @@ Face.prototype.transform = function (mobius) {
 			var r = Math.sqrt(x * x + y * y);
 
 			vertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
-    		vertices[i].z = Math.max(0, origVertices[i].z * (1 - r * r));
+    		vertices[i].z = Math.max(-0.0005, origVertices[i].z * (1 - r));
+//    		vertices[i].z = Math.max(0, origVertices[i].z * (1 - r * r));
 		}
 		
 		var p = this.region.p;
