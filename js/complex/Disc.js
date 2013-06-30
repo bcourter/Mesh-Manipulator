@@ -55,8 +55,12 @@ Disc.prototype.initFaces = function (geometries) {
             if (image.center.modulusSquared() > this.circleLimit)
                 continue;
 
-      //      if (faceCenters.contains(image.center))
-     //           continue;
+			var arg = image.center.argument();
+			if (arg <= -0.0001 || arg > 2 *Math.PI /3 )
+				continue;
+
+            if (faceCenters.contains(image.center))
+                continue;
 
             this.faces.push(image);
             geometries = geometries.concat(image.geometries);

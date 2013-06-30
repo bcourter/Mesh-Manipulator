@@ -1,7 +1,7 @@
 function Accuracy() {
 }
 
-Accuracy.linearTolerance = 1E-6;
+Accuracy.linearTolerance = 1E-5;
 Accuracy.angularTolerance = 1E-2;
 Accuracy.linearToleranceSquared = Accuracy.linearTolerance * Accuracy.linearTolerance;
 Accuracy.maxLength = 100;
@@ -207,7 +207,7 @@ Mobius.prototype.conjugateTranspose = function() {
 
 
 function ComplexCollection() {
-	this.sectorCount = 64;
+	this.sectorCount = 96;
 	this.annulusCount = 128;
 	this.sectors = [this.sectorCount];
 	this.clear();

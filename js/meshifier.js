@@ -1,4 +1,4 @@
-var renderer, camera, settings, panels, materials, objModel, newModel, lightGeometry;
+var renderer, camera, settings, panels, materials, objModel, geometries, lightGeometry;
 var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 
 init();
@@ -112,18 +112,21 @@ function render() {
     var scene = new THREE.Scene();
 
 	if (settings.is4dExplode.checked) {
-    	newModel = tool4dExplode.method(objModel, time);
+    	geometries = tool4dExplode.method(objModel, time);
 	} 
 
 	else if (settings.isHyperbolic.checked) {
-    	newModel = toolHyperbolic.method(objModel, time);
+    	geometries = toolHyperbolic.method(objModel, time);
 	}
 
 	else 
-		newModel = toolIdentity.method(objModel, time);
+		geometries = toolIdentity.method(objModel, time);
 
+    var newModel = new THREE.Object3D();
 
-
+    for (var i = 0, il = geometries.length; i < il; i++) 
+		newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometries[i], materials));
+	
     scene.add(newModel);
 
     var ambientLight = new THREE.AmbientLight(0x666666);
@@ -143,7 +146,11 @@ function render() {
 }
 
 function saveObj() {
-    var op = THREE.saveToObj(newModel);
+    var opModel = new THREE.Object3D();
+	for (var i = 0, il = geometries.length; i < il; i++) 
+		opModel.add(new THREE.Mesh(geometries[i] , new THREE.MeshNormalMaterial()));	
+
+    var op = THREE.saveToObj(opModel);
 
     var newWindow = window.open("");
     newWindow.document.write(op);
@@ -157,7 +164,6 @@ THREE.saveToObj = function (object3d) {
         if (child instanceof THREE.Mesh) {
             var mesh = child;
 
-			var nums = mesh.length;
 			var geometry = mesh.geometry;
 			mesh.updateMatrixWorld();
 
