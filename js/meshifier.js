@@ -88,7 +88,8 @@ function init() {
         });
     });
 
-    loader.load("resources/obj/kleinquartic.4.obj");
+    loader.load("resources/obj/kleinquartic.7-sept.obj");
+   // loader.load("resources/obj/4-5-pent.obj");
 
     settings = new Settings();
     panels = new Panels();
