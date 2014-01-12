@@ -109,7 +109,7 @@ var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
 		}
 	});
 
-    disc = new Disc(new Region(3, 7), 0.995, 44, geometry);
+    disc = new Disc(new Region(3, 7), 0.995, 144, geometry);
     return disc.geometries;
 });
 

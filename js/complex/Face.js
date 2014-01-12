@@ -91,7 +91,22 @@ Face.prototype.transform = function (mobius) {
 			var y = newVertices[i].y;
 			var r = Math.sqrt(x * x + y * y);
 			newVertices[i].z = origVertices[i].z * (1 - r * r);
-    		newVertices[i].z = Math.max(-0.01, newVertices[i].z);
+    	//	newVertices[i].z = Math.max(-0.01, newVertices[i].z);
+			if (origVertices[i] > 0) {
+				continue;
+			}
+
+			for (var k = 0; k < origVertices.length; k++) {
+				var test = origVertices[k].z;
+				if (test <= 0) {
+					continue;
+				}
+
+				if (Accuracy.lengthEquals(-origVertices[i].z, test)) {
+					newVertices[i].z = -newVertices[i].z - 0.04;
+					break;
+				}
+			}
 		}
 		
 		geom.vertices = newVertices;
