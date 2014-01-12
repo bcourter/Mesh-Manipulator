@@ -18,7 +18,7 @@ var MeshTool = function (name, method) {
 	];
 };
 
-var tool4dExplode = new MeshTool("4d Explode", function (objModel, time) {
+var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
     var newModel = new THREE.Object3D();
 
     var translate = new FOUR.Matrix5().makeTranslation(0, 0, 0, 0);
@@ -78,10 +78,15 @@ var tool4dExplode = new MeshTool("4d Explode", function (objModel, time) {
     return newModel;
 });
 
-var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
-	var offset = 0;
+var toolHyperbolic = new MeshTool("Hyperbolic", function (object3D, time) {
+    disc = new Disc(new Region(3, 7), 0.9, 144, colsolidateGeometry(object3D), materials);
+    return disc.model;
+});
+
+function colsolidateGeometry(object3D) {
+    var offset = 0;
     var geometry = new THREE.Geometry();
-    objModel.traverse(function (child) {
+    object3D.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
             var vertices = child.geometry.vertices;
             for (var i = 0, il = vertices.length; i < il; i++) {
@@ -105,25 +110,28 @@ var toolHyperbolic = new MeshTool("4d Explode", function (objModel, time) {
                 geometry.faces.push(face);
             }
 
-			offset += child.geometry.vertices.length;
-		}
-	});
+            offset += child.geometry.vertices.length;
+        }
+    });
 
-    disc = new Disc(new Region(3, 7), 0.995, 144, geometry);
-    return disc.geometries;
-});
+return geometry;
+}
 
-var toolIdentity = new MeshTool("4d Explode", function (objModel, time) {
+var toolStrip = new MeshTool("Strip", function (object3D, time) {
     var newModel = new THREE.Object3D();
 
-    objModel.traverse(function (child) {
+    object3D.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
             var geometry = new THREE.Geometry();
-
             var vertices = child.geometry.vertices;
             for (var i = 0, il = vertices.length; i < il; i++) {
-                var sumSq = (1 + vertices[i].lengthSq())
                 var vertex = vertices[i].clone();
+                
+                var z = new Complex(vertex.x, vertex.y);
+                z = Complex.atanh(z).multiplyScalar(4 / Math.PI);
+
+                vertex.x = z.re;
+                vertex.y = z.im;
                 geometry.vertices.push(vertex);
             }
 
@@ -132,11 +140,35 @@ var toolIdentity = new MeshTool("4d Explode", function (objModel, time) {
                 geometry.faces.push(faces[i]);
             }
 
-			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
-		}
-	});
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+        }
+    });
 
     return newModel;
 });
 
+var toolIdentity = new MeshTool("Identity", function (object3D, time) {
+    var newModel = new THREE.Object3D();
+
+    object3D.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            var geometry = new THREE.Geometry();
+            var vertices = child.geometry.vertices;
+            for (var i = 0, il = vertices.length; i < il; i++) {
+                var vertex = vertices[i].clone();
+                vertex.x = vertex.x;
+                geometry.vertices.push(vertex);
+            }
+
+            var faces = child.geometry.faces;
+            for (var i = 0, il = faces.length; i < il; i++) {
+                geometry.faces.push(faces[i]);
+            }
+
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+        }
+    });
+
+    return newModel;
+});
 

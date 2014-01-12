@@ -9,13 +9,13 @@ function Region(p, q) {
 
     this.l1 = Line.createTwoPoint(Complex.zero, Complex.one);
     this.l2 = Line.createPointAngle(Complex.zero, Math.PI / p);
-    this.c = Circle.prototype.create(new Complex([this.d, 0]), this.r);
+    this.c = Circle.prototype.create(new Complex(this.d, 0), this.r);
     var center = this.c.center();
 
     var polar = Complex.createPolar(this.r, Math.PI - this.phi);
     this.p0 = Complex.zero;
-    this.p1 = Complex.add(new Complex([this.d, 0]), polar);
-    this.p2 = new Complex([this.d - this.r, 0]);
+    this.p1 = Complex.add(new Complex(this.d, 0), polar);
+    this.p2 = new Complex(this.d - this.r, 0);
 }
 
 
@@ -58,12 +58,12 @@ Face.create = function (region, geometry) {
  		var newVerticesC = newGeomC.vertices;
 
 		for (var j = 0; j < geom.vertices.length; j++) {
-			var z = new Complex([geom.vertices[j].x, geom.vertices[j].y]);
+			var z = new Complex(geom.vertices[j].x, geom.vertices[j].y);
 			var zc = z.conjugate().transform(rotation);
 			z = z.transform(rotation);
 
-			newVertices[j] = new THREE.Vector3(z.data[0], z.data[1], geom.vertices[j].z);
-			newVerticesC[j] = new THREE.Vector3(zc.data[0], zc.data[1], geom.vertices[j].z);
+			newVertices[j] = new THREE.Vector3(z.re, z.im, geom.vertices[j].z);
+			newVerticesC[j] = new THREE.Vector3(zc.re, zc.im, geom.vertices[j].z);
 		}
 
         face.geometries.push(newGeom);

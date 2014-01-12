@@ -3,7 +3,7 @@ function Circline(a, b, c) {
 	this.b = b;
 	this.c = c;
 	
-	if(isNaN(a) || isNaN(b.data[0] || isNaN(b.data[1]) || isNaN(c)))	{
+	if(isNaN(a) || isNaN(b.re || isNaN(b.im) || isNaN(c)))	{
 		var d = 0; // tbd throw
 	}
 }
@@ -22,7 +22,7 @@ Circline.prototype.transform = function(mobius) {
 	//			new Mobius(new Complex(Circline.a, 0), Circline.b.Conjugate, Circline.b, new Complex(Circline.c, 0)) *
 	//			inverse.Conjugate;
 	var a = inverse.transpose();
-	var b = new Mobius(new Complex([this.a, 0]), this.b.conjugate(), this.b, new Complex([this.c, 0]));
+	var b = new Mobius(new Complex(this.a, 0), this.b.conjugate(), this.b, new Complex(this.c, 0));
 	var c = inverse.conjugate();	
 	
 	var hermitian = Mobius.multiply(
@@ -32,7 +32,7 @@ Circline.prototype.transform = function(mobius) {
 		),
 		c
 	);
-	return Circline.create(hermitian.a.data[0], hermitian.c, hermitian.d.data[0]);
+	return Circline.create(hermitian.a.re, hermitian.c, hermitian.d.re);
 };
 
 Circline.prototype.equals = function(circline) {
@@ -41,11 +41,11 @@ Circline.prototype.equals = function(circline) {
 
 Circline.prototype.isPointOnLeft = function(point) {
 	return (this.a * point.modulusSquared + Complex.add(Complex.multiply(this.b.conjugate(), point),
-	Complex.multiply(this.b , point.conjugate)).data[0] + this.c + Accuracy.LinearTolerance) > 0;
+	Complex.multiply(this.b , point.conjugate)).re + this.c + Accuracy.LinearTolerance) > 0;
 };
 
 Circline.prototype.containsPoint = function(point) {
-	return accuracy.lengthIsZero(this.a * point.ModulusSquared + Complex.add(Complex.multiply(this.b.conjugate(), point) , 			Complex.multiply(this.b , point.conjugate)).data[0] + c);
+	return accuracy.lengthIsZero(this.a * point.ModulusSquared + Complex.add(Complex.multiply(this.b.conjugate(), point) , 			Complex.multiply(this.b , point.conjugate)).re + c);
 };
 
 Circline.prototype.arePointsOnSameSide = function(p1, p2) {
@@ -96,7 +96,7 @@ Circle.prototype.inverse = function() {
 };
 
 Circle.prototype.asMobius = function() {
-	return new Mobius(this.center(), new Complex([this.radiusSquared() - this.center().modulusSquared(), 0]), Complex.one, this.b.conjugate());
+	return new Mobius(this.center(), new Complex(this.radiusSquared() - this.center().modulusSquared(), 0), Complex.one, this.b.conjugate());
 };
 
 Circle.prototype.scale = function(scale) {
@@ -118,15 +118,15 @@ Line.prototype = new Circline();
 Line.prototype.constructor = Line;
 
 Line.createTwoPoint = function(p1, p2) { 
-	dx = p2.data[0] - p1.data[0];
-	dy = p2.data[1] - p1.data[1];
+	dx = p2.re - p1.re;
+	dy = p2.im - p1.im;
 
-	return Line.createFromEquation(-dy, dx, dx * p1.data[1] - dy * p1.data[0]);
+	return Line.createFromEquation(-dy, dx, dx * p1.im - dy * p1.re);
 };
 
 // Creates a linear Circle a * x + b * y + c = 0 from reals a, b, and c.
 Line.createFromEquation = function(a, b, c) {
-	return new Line(new Complex([a / 2, b / 2]), c);
+	return new Line(new Complex(a / 2, b / 2), c);
 };
 
 Line.createPointAngle = function(point, angle) { 

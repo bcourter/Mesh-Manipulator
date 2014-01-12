@@ -1,4 +1,4 @@
-var renderer, camera, settings, panels, materials, objModel, geometries, lightGeometry;
+var renderer, camera, settings, panels, materials, model, objModel, lightGeometry;
 var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 
 init();
@@ -122,25 +122,21 @@ function render() {
     if (objModel === undefined)
         return;
 
+    if (model === undefined) {
+        model = objModel;
+
+    	if (settings.is4dExplode.checked) {
+        	model = tool4dExplode.method(model, time);
+    	} 
+
+    	else if (settings.isHyperbolic.checked) {
+            model = toolHyperbolic.method(model, time);
+        	model = toolStrip.method(model, time);
+    	}
+    }
+
     var scene = new THREE.Scene();
-
-	if (settings.is4dExplode.checked) {
-    	geometries = tool4dExplode.method(objModel, time);
-	} 
-
-	else if (settings.isHyperbolic.checked) {
-    	geometries = toolHyperbolic.method(objModel, time);
-	}
-
-	else 
-		geometries = toolIdentity.method(objModel, time);
-
-    var newModel = new THREE.Object3D();
-
-    for (var i = 0, il = geometries.length; i < il; i++) 
-		newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometries[i], materials));
-	
-    scene.add(newModel);
+    scene.add(model.clone());
 
     var ambientLight = new THREE.AmbientLight(0x666666);
     scene.add(ambientLight);
@@ -158,12 +154,30 @@ function render() {
     renderer.render(scene, camera);
 }
 
-function saveObj() {
-    var opModel = new THREE.Object3D();
-	for (var i = 0, il = geometries.length; i < il; i++) 
-		opModel.add(new THREE.Mesh(geometries[i] , new THREE.MeshNormalMaterial()));	
+function geometriesFromObj(objModel) {
+    var newModel = new THREE.Object3D();
 
-    var op = THREE.saveToObj(opModel);
+    objModel.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            var geometry = new THREE.Geometry();
+
+            var vertices = child.geometry.vertices;
+            for (var i = 0, il = vertices.length; i < il; i++) 
+                geometry.vertices.push(vertices[i].clone());
+
+            var faces = child.geometry.faces;
+            for (var i = 0, il = faces.length; i < il; i++) 
+                geometry.faces.push(faces[i]);
+
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+        }
+    });
+
+    return [ newModel ];
+}
+
+function saveObj() {
+    var op = THREE.saveToObj(model);
 
     var newWindow = window.open("");
     newWindow.document.write(op);

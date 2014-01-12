@@ -22,45 +22,84 @@ Accuracy.angleIsZero = function(a) {
 	return Math.Abs(a) < Accuracy.angularTolerance;
 };
 	
-function Complex(a) {
-	this.data = [2];
-//	this.data = new glMatrixArrayType(2);
-	this.data[0] = a[0];
-	this.data[1] = a[1];
+function Complex(re, im) {
+	this.re = re;
+	this.im = im;
 }
 
-Complex.zero = new Complex([0.0, 0.0]);
-Complex.one = new Complex([1.0, 0.0]);
-Complex.i = new Complex([0.0, 1.0]);
+Complex.zero = new Complex(0.0, 0.0);
+Complex.one = new Complex(1.0, 0.0);
+Complex.i = new Complex(0.0, 1.0);
 
 Complex.createFromVector3 = function(v) {
-	return new Complex([v.x, v.y]);
+	return new Complex(v.x, v.y);
 };
 
 Complex.createPolar = function(r, theta) {
-	return new Complex([r * Math.cos(theta), r * Math.sin(theta)]);
+	return new Complex(r * Math.cos(theta), r * Math.sin(theta));
 };
 
 Complex.add = function(a, b) {
-	return new Complex([a.data[0] + b.data[0], a.data[1] + b.data[1]]);
+	return new Complex(a.re + b.re, a.im + b.im);
 };
 
 Complex.subtract = function(a, b) {	
-	return new Complex([a.data[0] - b.data[0], a.data[1] - b.data[1]]);
+	return new Complex(a.re - b.re, a.im - b.im);
 };
 
 Complex.multiply = function(a, b) {
-	if (a == undefined || b == undefined || a.data == undefined || b.data == undefined) {
-		var x = 0;
-	}
+//	if (a == undefined || b == undefined || a.data == undefined || b.data == undefined) {
+//		var x = 0;
+//	}
 	
-	return new Complex([a.data[0] * b.data[0] - a.data[1] * b.data[1], a.data[0] * b.data[1] + a.data[1] * b.data[0]]);
+	return new Complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
 };
 
 Complex.divide = function(a, b) {
-	var automorphy = b.data[0] * b.data[0] + b.data[1] * b.data[1];
-	return new Complex([(a.data[0] * b.data[0] + a.data[1] * b.data[1]) / automorphy, (a.data[1] * b.data[0] - a.data[0] * b.data[1]) / automorphy]);
+	var automorphy = b.re * b.re + b.im * b.im;
+	return new Complex((a.re * b.re + a.im * b.im) / automorphy, (a.im * b.re - a.re * b.im) / automorphy);
 };
+
+Complex.exp = function(z) {
+	return z.createPolar(z.modulus(), z.argument());
+};
+			
+Complex.log = function(z) {
+ 	return new Complex(Math.log(z.modulus()), z.argument());
+};
+
+Complex.sinh = function(z) {
+ 	return (Complex.exp(z) - Complex.exp(z.negative())).multiplyScalar(0.5);
+};
+
+Complex.cosh = function(z) {
+ 	return (Complex.exp(z) - Complex.exp(z.negative())).multiplyScalar(0.5);
+};
+
+Complex.tanh = function(z) {
+ 	return Complex.divide(Complex.sinh(z), Complex.cosh(z));
+};
+
+
+			// // For perfect band, use: pos = (4.0 / pi) * cAtanh(pos);
+			// return 0.5 * (cLog(one + z) - cLog(one - z));
+Complex.atanh = function(z) {
+	return Complex.subtract(
+		Complex.log(Complex.add(Complex.one, z)),
+		Complex.log(Complex.subtract(Complex.one, z))
+		).multiplyScalar(0.5);
+};
+// Complex.atanh = function(z) {
+// 	return Complex.log(
+// 		Complex.divide(
+// 			Complex.add(Complex.one, z),
+// 			Complex.add(Complex.one, z.negative())
+// 		)).multiplyScalar(0.5);
+// };			
+			// vec2 cSin(in vec2 z) {
+			// 	return 0.5 * cMultiply(i, exp(cMultiply(i, z)) - exp(cMultiply(-1.0 * i, z)));
+			// }
+
 
 Complex.transformArray = function (original, mobius) {
     var transformed = [original.length];
@@ -85,7 +124,7 @@ Complex.prototype.scale = function(s) {
 		scale = scale.modulus;
 	}
 
-	return new Complex([this.data[0] * s, this.data[1] * s]);
+	return new Complex(this.re * s, this.im * s);
 };
 
 Complex.equals = function(a, b) {
@@ -93,19 +132,19 @@ Complex.equals = function(a, b) {
 };
 
 Complex.prototype.modulus = function() {
-	return Math.sqrt(this.data[0] * this.data[0] + this.data[1] * this.data[1]);
+	return Math.sqrt(this.re * this.re + this.im * this.im);
 };
 
 Complex.prototype.modulusSquared = function() {
-	return this.data[0] * this.data[0] + this.data[1] * this.data[1];
+	return this.re * this.re + this.im * this.im;
 };
 
 Complex.prototype.argument = function() {
-	return Math.atan2(this.data[1], this.data[0]);
+	return Math.atan2(this.im, this.re);
 };
 
 Complex.prototype.negative = function() {
-	return new Complex([-this.data[0], -this.data[1]]);
+	return new Complex(-this.re, -this.im);
 };
 
 Complex.prototype.transform = function(mobius) {
@@ -113,15 +152,19 @@ Complex.prototype.transform = function(mobius) {
 };
 
 Complex.prototype.conjugate = function() {
-	return new Complex([this.data[0], -this.data[1]]);
+	return new Complex(this.re, -this.im);
+};
+
+Complex.prototype.multiplyScalar = function(s) {
+	return new Complex(s * this.re, s * this.im);
 };
 
 Complex.prototype.toString = function() {
-	return "{" + this.data[0] + ", " + this.data[1] + "}";
+	return "{" + this.re + ", " + this.im + "}";
 };
 
 Complex.prototype.toVector3 = function() {
-	return new THREE.Vector3(this.data[0], this.data[1], 0);
+	return new THREE.Vector3(this.re, this.im, 0);
 };
 
 

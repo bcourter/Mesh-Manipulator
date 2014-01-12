@@ -1,4 +1,4 @@
-function Disc(region, circleLimit, maxRegions, geometry) {
+function Disc(region, circleLimit, maxRegions, geometry, materials) {
     this.region = region;
     this.circleLimit = circleLimit;
     this.maxRegions = maxRegions;
@@ -6,17 +6,19 @@ function Disc(region, circleLimit, maxRegions, geometry) {
     this.circleMaxModulus;
     this.radiusLimit = 1E-4;
     
-	this.geometries = [];
     this.initialFace = Face.create(region, geometry); //.transform(Mobius.createDiscAutomorphism(new Complex([0.001, 0.001]), 0));
     this.initialFace = this.initialFace.transform(Mobius.identity);
-	this.geometries = this.geometries.concat(this.initialFace.geometries);
 	
    	this.faces = [this.initialFace];
 
     this.drawCount = 1;
     this.totalDraw = 0;
 
-    this.geometries = this.initFaces(this.geometries);
+    this.geometries = this.initFaces(this.initialFace.geometries);
+
+    this.model = new THREE.Object3D();
+    for (var i = 0, length = this.geometries.length; i < length; i++) 
+        this.model.add(THREE.SceneUtils.createMultiMaterialObject(this.geometries[i], materials));
 }
 
 Disc.prototype.initFaces = function (geometries) {
@@ -47,7 +49,7 @@ Disc.prototype.initFaces = function (geometries) {
 
             var mobius = edge.Circline.asMobius();
             var image = face.conjugate().transform(mobius);
-            //          if (isNaN(image.center.data[0])) {
+            //          if (isNaN(image.center.re)) {
             //              output("NaN!");
             //             continue;
             //         }
@@ -55,14 +57,14 @@ Disc.prototype.initFaces = function (geometries) {
             if (image.center.modulusSquared() > this.circleLimit)
                 continue;
 
-			var arg = image.center.argument();
-			if (arg <= -0.0001 || arg > 2 *Math.PI /3 )
-				continue;
+			// var arg = image.center.argument();
+			// if (arg <= -0.0001 || arg > 2 *Math.PI /3 )
+			// 	continue;
 
             if (faceCenters.contains(image.center))
                 continue;
 
-            this.faces.push(image);
+            //this.faces.push(image);
             geometries = geometries.concat(image.geometries);
             faceQueue.unshift(image);
             faceCenters.add(image.center);
