@@ -151,7 +151,7 @@ var translate = function(vertex) {
     var polar = Complex.createPolar(r, Math.PI - phi);
     var p1 = Complex.add(new Complex(d, 0), polar);
 
-    var translation = Mobius.createDiscAutomorphism(new Complex(-p1.modulus(), 0), 0);
+    var translation = Mobius.createDiscAutomorphism(new Complex(-p1.modulus(), 0), 3/10 * Math.PI);
   //  var translation = Mobius.createDiscAutomorphism(p1, 0);
     z = z.transform(translation);
 
@@ -183,7 +183,7 @@ function render() {
             model = toolHyperbolic.method(model, time);
             model = toolFunction.method(model, rotate);
             model = toolFunction.method(model, translate);
-        	//model = toolFunction.method(model, circleToStrip);
+        	model = toolFunction.method(model, circleToStrip);
     	}
     }
 
@@ -233,6 +233,8 @@ function saveObj() {
 
     var newWindow = window.open("");
     newWindow.document.write(op);
+
+    //console.log(op);
 }
 
 THREE.saveToObj = function (object3d) {

@@ -18,6 +18,15 @@ var MeshTool = function (name, method) {
 	];
 };
 
+basicMaterial = [
+    new THREE.MeshLambertMaterial( { 
+        color: 0x222222, 
+        side: THREE.DoubleSide,
+        shading: THREE.FlatShading, 
+        transparent: true,  
+        opacity: 0.5
+    } )];
+
 var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
     var newModel = new THREE.Object3D();
 
@@ -71,7 +80,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
                 geometry.faces.push(face);
             }
 
-			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+			newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
 		}
 	});
 
@@ -79,7 +88,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (object3D, time) {
-    disc = new Disc(new Region(4, 5), 0.9, 144, colsolidateGeometry(object3D), materials);
+    disc = new Disc(new Region(4, 5), 0.99, 144, colsolidateGeometry(object3D), basicMaterial);
     return disc.model;
 });
 
@@ -140,7 +149,7 @@ var toolStrip = new MeshTool("Strip", function (object3D, time) {
                 geometry.faces.push(faces[i]);
             }
 
-            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
         }
     });
 
@@ -164,7 +173,7 @@ var toolFunction = new MeshTool("Function", function (object3D, fn) {
                 geometry.faces.push(faces[i]);
             }
 
-            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
         }
     });
 
@@ -189,7 +198,7 @@ var toolIdentity = new MeshTool("Identity", function (object3D, time) {
                 geometry.faces.push(faces[i]);
             }
 
-            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
         }
     });
 

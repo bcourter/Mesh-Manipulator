@@ -24,7 +24,8 @@ function Disc(region, circleLimit, maxRegions, geometry, materials) {
 Disc.prototype.initFaces = function (geometries) {
     var seedFace = this.initialFace;
     var faceQueue = [seedFace];
-    var faceCenters = new ComplexCollection();
+ //   var faceCenters = new ComplexCollection();
+    var faceCenters = [];
 
     var count = 1;
     var minDist = 1;
@@ -61,13 +62,18 @@ Disc.prototype.initFaces = function (geometries) {
 			// if (arg <= -0.0001 || arg > 2 *Math.PI /3 )
 			// 	continue;
 
-            if (faceCenters.contains(image.center))
-                continue;
+         //   if (faceCenters.contains(image.center))
+          //      continue;
+            for (var j = 0; j < faceCenters.length; j++) {
+                if (Complex.equals(image.center, faceCenters[j]))
+                    continue;
+            }
 
             //this.faces.push(image);
             geometries = geometries.concat(image.geometries);
             faceQueue.unshift(image);
-            faceCenters.add(image.center);
+        //    faceCenters.add(image.center);
+            faceCenters.push(image.center);
             count++;
         //    break;
         }
