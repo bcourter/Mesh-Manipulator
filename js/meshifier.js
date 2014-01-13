@@ -88,8 +88,8 @@ function init() {
         });
     });
 
-    loader.load("resources/obj/kleinquartic.7-sept.obj");
-   // loader.load("resources/obj/4-5-pent.obj");
+   // loader.load("resources/obj/kleinquartic.4.obj");
+    loader.load("resources/obj/4-5-pent.obj");
 
     settings = new Settings();
     panels = new Panels();
@@ -116,6 +116,55 @@ function animate() {
     //stats.update();
 }
 
+var circleToStrip = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+    z = Complex.atanh(z).scale(4 / Math.PI);  // butulov says 2 * pi, my old notes this.  what up?
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+var rotate = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    var rotation = Mobius.createRotation(1/4 * Math.PI);
+    z = z.transform(rotation);
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+var translate = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    var p = 4;
+    var q = 5;
+    var sinP2 = Math.pow(Math.sin(Math.PI / p), 2);
+    var cosQ2 = Math.pow(Math.cos(Math.PI / q), 2);
+    var r = Math.sqrt(sinP2 / (cosQ2 - sinP2));
+    var d = Math.sqrt(cosQ2 / (cosQ2 - sinP2));
+    distEuclid = (d - r);
+
+    var phi = Math.PI * (0.5 - (1.0 / p + 1.0 / q));
+    var polar = Complex.createPolar(r, Math.PI - phi);
+    var p1 = Complex.add(new Complex(d, 0), polar);
+
+    var translation = Mobius.createDiscAutomorphism(new Complex(-p1.modulus(), 0), 0);
+  //  var translation = Mobius.createDiscAutomorphism(p1, 0);
+    z = z.transform(translation);
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+function linearToHyperbolic(x) {
+    x++;  // to scale...
+    return Math.log(x + Math.sqrt(x * x - 1)); // arcosh(x)
+}
+
 function render() {
     var time = new Date().getTime() / 1000;
     lastTime = time;
@@ -132,7 +181,9 @@ function render() {
 
     	else if (settings.isHyperbolic.checked) {
             model = toolHyperbolic.method(model, time);
-        	model = toolStrip.method(model, time);
+            model = toolFunction.method(model, rotate);
+            model = toolFunction.method(model, translate);
+        	//model = toolFunction.method(model, circleToStrip);
     	}
     }
 

@@ -79,7 +79,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (object3D, time) {
-    disc = new Disc(new Region(3, 7), 0.9, 144, colsolidateGeometry(object3D), materials);
+    disc = new Disc(new Region(4, 5), 0.9, 144, colsolidateGeometry(object3D), materials);
     return disc.model;
 });
 
@@ -133,6 +133,30 @@ var toolStrip = new MeshTool("Strip", function (object3D, time) {
                 vertex.x = z.re;
                 vertex.y = z.im;
                 geometry.vertices.push(vertex);
+            }
+
+            var faces = child.geometry.faces;
+            for (var i = 0, il = faces.length; i < il; i++) {
+                geometry.faces.push(faces[i]);
+            }
+
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+        }
+    });
+
+    return newModel;
+});
+
+var toolFunction = new MeshTool("Function", function (object3D, fn) {
+    var newModel = new THREE.Object3D();
+
+    object3D.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            var geometry = new THREE.Geometry();
+            var vertices = child.geometry.vertices;
+            for (var i = 0, il = vertices.length; i < il; i++) {
+                var vertex = vertices[i].clone();
+                geometry.vertices.push(fn(vertex));
             }
 
             var faces = child.geometry.faces;

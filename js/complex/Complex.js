@@ -87,7 +87,7 @@ Complex.atanh = function(z) {
 	return Complex.subtract(
 		Complex.log(Complex.add(Complex.one, z)),
 		Complex.log(Complex.subtract(Complex.one, z))
-		).multiplyScalar(0.5);
+		).scale(0.5);
 };
 // Complex.atanh = function(z) {
 // 	return Complex.log(
@@ -153,10 +153,6 @@ Complex.prototype.transform = function(mobius) {
 
 Complex.prototype.conjugate = function() {
 	return new Complex(this.re, -this.im);
-};
-
-Complex.prototype.multiplyScalar = function(s) {
-	return new Complex(s * this.re, s * this.im);
 };
 
 Complex.prototype.toString = function() {
