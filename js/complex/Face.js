@@ -10,7 +10,6 @@ function Region(p, q) {
     this.l1 = Line.createTwoPoint(Complex.zero, Complex.one);
     this.l2 = Line.createPointAngle(Complex.zero, Math.PI / p);
     this.c = Circle.prototype.create(new Complex(this.d, 0), this.r);
-    var center = this.c.center();
 
     var polar = Complex.createPolar(this.r, Math.PI - this.phi);
     this.p0 = Complex.zero;

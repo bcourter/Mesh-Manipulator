@@ -88,7 +88,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (object3D, time) {
-    disc = new Disc(new Region(4, 5), 0.99, 144, colsolidateGeometry(object3D), basicMaterial);
+    disc = new Disc(new Region(4, 5), 0.99, 720, colsolidateGeometry(object3D), basicMaterial);
     return disc.model;
 });
 

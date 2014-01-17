@@ -128,7 +128,7 @@ Complex.prototype.scale = function(s) {
 };
 
 Complex.equals = function(a, b) {
-	return Complex.subtract(a, b).modulusSquared() < this.linearTolerance * this.linearTolerance;
+	return Complex.subtract(a, b).modulusSquared() < Accuracy.linearTolerance * Accuracy.linearTolerance;
 };
 
 Complex.prototype.modulus = function() {

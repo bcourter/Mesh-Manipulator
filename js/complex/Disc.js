@@ -24,11 +24,10 @@ function Disc(region, circleLimit, maxRegions, geometry, materials) {
 Disc.prototype.initFaces = function (geometries) {
     var seedFace = this.initialFace;
     var faceQueue = [seedFace];
- //   var faceCenters = new ComplexCollection();
-    var faceCenters = [];
+    var faceCenters = new ComplexCollection();
+ //   var faceCenters = [];
 
     var count = 1;
-    var minDist = 1;
     while (faceQueue.length > 0 && count < this.maxRegions) {
         face = faceQueue.pop();
 
@@ -41,7 +40,6 @@ Disc.prototype.initFaces = function (geometries) {
             if (c.constructor != Circle)
                 continue;
 
-
             //       if (face.edgeCenters[i].magnitudeSquared > 0.9) 
             //          continue;
 
@@ -50,30 +48,30 @@ Disc.prototype.initFaces = function (geometries) {
 
             var mobius = edge.Circline.asMobius();
             var image = face.conjugate().transform(mobius);
-            //          if (isNaN(image.center.re)) {
-            //              output("NaN!");
-            //             continue;
-            //         }
 
             if (image.center.modulusSquared() > this.circleLimit)
                 continue;
 
-			// var arg = image.center.argument();
-			// if (arg <= -0.0001 || arg > 2 *Math.PI /3 )
-			// 	continue;
+			 var arg = image.center.argument();
+			 if (arg <= -0.001 || arg > Math.PI + 0.001 )
+			 	continue;
 
-         //   if (faceCenters.contains(image.center))
-          //      continue;
-            for (var j = 0; j < faceCenters.length; j++) {
-                if (Complex.equals(image.center, faceCenters[j]))
-                    continue;
-            }
+             var p = new THREE.Vector3(image.center.re, image.center.im, 0);
+             p = rotate(p);
+             p = translate(p);
+             p = circleToStrip(p);
+             if (p.x > 1.4) 
+                continue;
+            if (p.x < -0.5)
+                continue;
 
-            //this.faces.push(image);
+            if (faceCenters.contains(image.center))
+                continue;
+
+
             geometries = geometries.concat(image.geometries);
             faceQueue.unshift(image);
-        //    faceCenters.add(image.center);
-            faceCenters.push(image.center);
+            faceCenters.add(image.center);
             count++;
         //    break;
         }

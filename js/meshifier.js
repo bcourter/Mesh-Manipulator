@@ -89,7 +89,7 @@ function init() {
     });
 
    // loader.load("resources/obj/kleinquartic.4.obj");
-    loader.load("resources/obj/4-5-pent.obj");
+    loader.load("resources/obj/4-5.3.obj");
 
     settings = new Settings();
     panels = new Panels();
@@ -160,6 +160,15 @@ var translate = function(vertex) {
     return vertex;
 };
 
+var roll = function(vertex) {         
+    var n = 4;
+    var period = 1.1394350620387064 * 4;
+    var radius = n * period / 2 / Math.PI;
+    vertex.z = vertex.x * 1/Math.tan(Math.asin(vertex.x / radius));
+    return vertex;
+};
+
+
 function linearToHyperbolic(x) {
     x++;  // to scale...
     return Math.log(x + Math.sqrt(x * x - 1)); // arcosh(x)
@@ -183,7 +192,8 @@ function render() {
             model = toolHyperbolic.method(model, time);
             model = toolFunction.method(model, rotate);
             model = toolFunction.method(model, translate);
-        	model = toolFunction.method(model, circleToStrip);
+            model = toolFunction.method(model, circleToStrip);
+        	model = toolFunction.method(model, roll);
     	}
     }
 
