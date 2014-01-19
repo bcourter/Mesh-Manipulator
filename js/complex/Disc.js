@@ -14,18 +14,17 @@ function Disc(region, circleLimit, maxRegions, geometry, materials) {
     this.drawCount = 1;
     this.totalDraw = 0;
 
-    this.geometries = this.initFaces(this.initialFace.geometries);
+    this.geometry = this.initFaces(this.initialFace.geometry);
 
     this.model = new THREE.Object3D();
-    for (var i = 0, length = this.geometries.length; i < length; i++) 
-        this.model.add(THREE.SceneUtils.createMultiMaterialObject(this.geometries[i], materials));
+    this.model.add(THREE.SceneUtils.createMultiMaterialObject(this.geometry, materials));
 }
 
-Disc.prototype.initFaces = function (geometries) {
+Disc.prototype.initFaces = function (geometry) {
     var seedFace = this.initialFace;
     var faceQueue = [seedFace];
     var faceCenters = new ComplexCollection();
- //   var faceCenters = [];
+    var geom = geometry.clone();
 
     var count = 1;
     while (faceQueue.length > 0 && count < this.maxRegions) {
@@ -71,8 +70,7 @@ Disc.prototype.initFaces = function (geometries) {
             if (faceCenters.contains(image.center))
                 continue;
 
-
-            geometries = geometries.concat(image.geometries);
+            THREE.GeometryUtils.merge(geom, image.geometry);
             faceQueue.unshift(image);
             faceCenters.add(image.center);
             count++;
@@ -81,7 +79,7 @@ Disc.prototype.initFaces = function (geometries) {
     }
 
     this.circleMaxModulus = faceCenters.max;
-	return geometries;
+	return geom;
 };
 
 var backgroundColor = null;

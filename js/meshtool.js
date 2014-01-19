@@ -88,44 +88,27 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (object3D, time) {
-    disc = new Disc(new Region(4, 5), 0.975, 144, colsolidateGeometry(object3D), basicMaterial);
+    var geometry = mergeAllVertices(object3D);
+    disc = new Disc(new Region(4, 5), 0.975, 144, geometry, basicMaterial);
     return disc.model;
 });
 
-function colsolidateGeometry(object3D) {
+function mergeAllVertices(object3D) {
     var offset = 0;
     var geometry = new THREE.Geometry();
     object3D.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
+            if (geometry.vertices.length == 0) {
+                geometry = child.geometry.clone();
+                return;
+            }
+
             THREE.GeometryUtils.merge(geometry, child.geometry);
-            geometry.mergeVertices();
-            // var vertices = child.geometry.vertices;
-            // for (var i = 0, il = vertices.length; i < il; i++) {
-            //     var vertex = vertices[i].clone();
-            //     geometry.vertices.push(vertex);
-            // }
-
-            // var faces = child.geometry.faces;
-            // for (var i = 0, il = faces.length; i < il; i++) {
-            //     var a = faces[i].a;
-            //     var b = faces[i].b;
-            //     var c = faces[i].c;
-            //     var d = faces[i].d;
-
-            //     var face;
-            //     if (d === undefined)
-            //         face = new THREE.Face3(a + offset, b + offset, c + offset, null, faces[i].color, faces[i].materialIndex);
-            //     else
-            //         face = new THREE.Face4(a + offset, b + offset, c + offset, d + offset, null, faces[i].color, faces[i].materialIndex);
-
-            //     geometry.faces.push(face);
-            // }
-
-            // offset += child.geometry.vertices.length;
         }
     });
 
-return geometry;
+    geometry.mergeVertices();
+    return geometry;
 }
 
 
@@ -155,7 +138,7 @@ var toolFunction = new MeshTool("Function", function (object3D, fn) {
 
 var toolOffset = new MeshTool("Function", function (object3D, thickness) {
     var newModel = new THREE.Object3D();
-    var consolidated = colsolidateGeometry(object3D);
+    var consolidated = mergeAllVertices(object3D);
 
     var geometry = new THREE.Geometry();
     consolidated.computeFaceNormals();
@@ -197,7 +180,7 @@ var toolOffset = new MeshTool("Function", function (object3D, thickness) {
         }
 
         var stretch = 1 - vertex.z / 0.08 + 0.08
-        stretch *= widthRatio * 1/3;
+        stretch *= Math.sqrt(widthRatio) * 1/3;
         normals[i].x *= stretch;
         normals[i].y *= stretch;
         
