@@ -165,9 +165,6 @@ var toolOffset = new MeshTool("Function", function (object3D, thickness) {
         var vertex = vertices[i].clone();
         var widthRatio = Math.abs(vertex.y);
 
-      //  if (normals[i].z < 0)
-       //     normals[i] = normals[i].multiplyScalar(-1);
-
     //   var azimuth = Math.atan2(normals[i].z, Math.sqrt(normals[i].x * normals[i].x + normals[i].y * normals[i].y));
         // if (vertex.z > 0.04) {
         //     normals[i].x = 0;
@@ -175,9 +172,9 @@ var toolOffset = new MeshTool("Function", function (object3D, thickness) {
         //     normals[i].z = 2/3;
         // }
 
-        // if (vertex.z < -0.04) {
-        //     normals[i].z = 0;
-        // }
+        if (vertex.z < -0.04) {
+            normals[i].z = 0;
+        }
 
         // var stretch = 1 - vertex.z / 0.08 + 0.08
         // stretch *= Math.sqrt(widthRatio) * 1/3;

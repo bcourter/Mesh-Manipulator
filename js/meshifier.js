@@ -209,7 +209,7 @@ function render() {
              model = toolOffset.method(model, 0.001 / 0.13);
            //  model = toolFunction.method(model, roll);
             // model = toolFunction.method(model, scale);
-        	 model = toolIdentity.method(model);
+        	// model = toolIdentity.method(model);
     	}
     }
 
