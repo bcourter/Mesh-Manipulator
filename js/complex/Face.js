@@ -64,6 +64,17 @@ Face.create = function (region, geometry) {
 			newVerticesC[j] = new THREE.Vector3(zc.re, zc.im, geom.vertices[j].z);
 		}
 
+		newGeom.computeFaceNormals();
+    	newGeom.computeVertexNormals();
+		newGeomC.computeFaceNormals();
+    	newGeomC.computeVertexNormals();
+
+    	for (var k = 0, kl = newGeomC.faces.length; k < kl; k++) {
+    		var normals = newGeomC.faces[k].vertexNormals;
+    		for (var j = 0, jl = normals.length; j < jl; j++) 
+      	    	normals[j] = normals[j].multiplyScalar(-1);
+      	}
+
         THREE.GeometryUtils.merge(face.geometry, newGeom);
         THREE.GeometryUtils.merge(face.geometry, newGeomC);
     }

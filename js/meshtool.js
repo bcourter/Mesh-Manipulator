@@ -165,26 +165,28 @@ var toolOffset = new MeshTool("Function", function (object3D, thickness) {
         var vertex = vertices[i].clone();
         var widthRatio = Math.abs(vertex.y);
 
-        if (normals[i].z < 0)
-            normals[i] = normals[i].multiplyScalar(-1);
+      //  if (normals[i].z < 0)
+       //     normals[i] = normals[i].multiplyScalar(-1);
 
     //   var azimuth = Math.atan2(normals[i].z, Math.sqrt(normals[i].x * normals[i].x + normals[i].y * normals[i].y));
-        if (vertex.z > 0.04) {
-            normals[i].x = 0;
-            normals[i].y = 0;
-            normals[i].z = 2/3;
-        }
+        // if (vertex.z > 0.04) {
+        //     normals[i].x = 0;
+        //     normals[i].y = 0;
+        //     normals[i].z = 2/3;
+        // }
 
-        if (vertex.z < -0.04) {
-            normals[i].z = 0;
-        }
+        // if (vertex.z < -0.04) {
+        //     normals[i].z = 0;
+        // }
 
-        var stretch = 1 - vertex.z / 0.08 + 0.08
-        stretch *= Math.sqrt(widthRatio) * 1/3;
-        normals[i].x *= stretch;
-        normals[i].y *= stretch;
+        // var stretch = 1 - vertex.z / 0.08 + 0.08
+        // stretch *= Math.sqrt(widthRatio) * 1/3;
+        // normals[i].x *= stretch;
+        // normals[i].y *= stretch;
+
+        var scale = 1;
         
-        vertex.add(normals[i].multiplyScalar(thickness))
+        vertex.add(normals[i].multiplyScalar(thickness * scale))
         geometry.vertices.push(vertex);
     }
 
@@ -208,7 +210,6 @@ var toolIdentity = new MeshTool("Identity", function (object3D, time) {
             var vertices = child.geometry.vertices;
             for (var i = 0, il = vertices.length; i < il; i++) {
                 var vertex = vertices[i].clone();
-                vertex.x = vertex.x;
                 geometry.vertices.push(vertex);
             }
 
@@ -217,7 +218,7 @@ var toolIdentity = new MeshTool("Identity", function (object3D, time) {
                 geometry.faces.push(faces[i]);
             }
 
-            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
+            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, this.materials));
         }
     });
 

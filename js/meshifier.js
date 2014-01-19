@@ -89,7 +89,7 @@ function init() {
     });
 
    // loader.load("resources/obj/kleinquartic.4.obj");
-    loader.load("resources/obj/4-5.29-2.obj");
+    loader.load("resources/obj/4-5.30-1.obj");
 
     settings = new Settings();
     panels = new Panels();
@@ -122,6 +122,7 @@ var circleToStrip = function(vertex) {
 
     vertex.x = z.re;
     vertex.y = z.im;
+    vertex.z *= Math.cos(vertex.y * Math.PI / 2) 
     return vertex;
 };
 
@@ -166,7 +167,7 @@ var roll = function(vertex) {
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
     var phi = vertex.x / radius;
-    var dist = radius + sign * vertex.z * Math.cos(vertex.y * Math.PI / 2) * 2;
+    var dist = radius + sign * vertex.z * 2;
     vertex.z = dist * Math.cos(phi);
     vertex.x = dist * Math.sin(phi);
 
@@ -206,8 +207,9 @@ function render() {
              model = toolFunction.method(model, circleToStrip);
 
              model = toolOffset.method(model, 0.001 / 0.13);
-             model = toolFunction.method(model, roll);
-        	// model = toolFunction.method(model, scale);
+           //  model = toolFunction.method(model, roll);
+            // model = toolFunction.method(model, scale);
+        	 model = toolIdentity.method(model);
     	}
     }
 
