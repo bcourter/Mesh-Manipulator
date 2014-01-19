@@ -89,7 +89,7 @@ function init() {
     });
 
    // loader.load("resources/obj/kleinquartic.4.obj");
-    loader.load("resources/obj/4-5.26.obj");
+    loader.load("resources/obj/4-5.29-2.obj");
 
     settings = new Settings();
     panels = new Panels();

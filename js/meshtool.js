@@ -97,34 +97,37 @@ function colsolidateGeometry(object3D) {
     var geometry = new THREE.Geometry();
     object3D.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
-            var vertices = child.geometry.vertices;
-            for (var i = 0, il = vertices.length; i < il; i++) {
-                var vertex = vertices[i].clone();
-                geometry.vertices.push(vertex);
-            }
+            THREE.GeometryUtils.merge(geometry, child.geometry);
+            geometry.mergeVertices();
+            // var vertices = child.geometry.vertices;
+            // for (var i = 0, il = vertices.length; i < il; i++) {
+            //     var vertex = vertices[i].clone();
+            //     geometry.vertices.push(vertex);
+            // }
 
-            var faces = child.geometry.faces;
-            for (var i = 0, il = faces.length; i < il; i++) {
-                var a = faces[i].a;
-                var b = faces[i].b;
-                var c = faces[i].c;
-                var d = faces[i].d;
+            // var faces = child.geometry.faces;
+            // for (var i = 0, il = faces.length; i < il; i++) {
+            //     var a = faces[i].a;
+            //     var b = faces[i].b;
+            //     var c = faces[i].c;
+            //     var d = faces[i].d;
 
-                var face;
-                if (d === undefined)
-                    face = new THREE.Face3(a + offset, b + offset, c + offset, null, faces[i].color, faces[i].materialIndex);
-                else
-                    face = new THREE.Face4(a + offset, b + offset, c + offset, d + offset, null, faces[i].color, faces[i].materialIndex);
+            //     var face;
+            //     if (d === undefined)
+            //         face = new THREE.Face3(a + offset, b + offset, c + offset, null, faces[i].color, faces[i].materialIndex);
+            //     else
+            //         face = new THREE.Face4(a + offset, b + offset, c + offset, d + offset, null, faces[i].color, faces[i].materialIndex);
 
-                geometry.faces.push(face);
-            }
+            //     geometry.faces.push(face);
+            // }
 
-            offset += child.geometry.vertices.length;
+            // offset += child.geometry.vertices.length;
         }
     });
 
 return geometry;
 }
+
 
 var toolFunction = new MeshTool("Function", function (object3D, fn) {
     var newModel = new THREE.Object3D();
