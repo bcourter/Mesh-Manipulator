@@ -88,7 +88,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometries, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (object3D, time) {
-    disc = new Disc(new Region(4, 5), 0.99, 720, colsolidateGeometry(object3D), basicMaterial);
+    disc = new Disc(new Region(4, 5), 0.975, 144, colsolidateGeometry(object3D), basicMaterial);
     return disc.model;
 });
 
@@ -99,7 +99,7 @@ function colsolidateGeometry(object3D) {
         if (child instanceof THREE.Mesh) {
             var vertices = child.geometry.vertices;
             for (var i = 0, il = vertices.length; i < il; i++) {
-                 var vertex = vertices[i].clone();
+                var vertex = vertices[i].clone();
                 geometry.vertices.push(vertex);
             }
 
@@ -126,36 +126,6 @@ function colsolidateGeometry(object3D) {
 return geometry;
 }
 
-var toolStrip = new MeshTool("Strip", function (object3D, time) {
-    var newModel = new THREE.Object3D();
-
-    object3D.traverse(function (child) {
-        if (child instanceof THREE.Mesh) {
-            var geometry = new THREE.Geometry();
-            var vertices = child.geometry.vertices;
-            for (var i = 0, il = vertices.length; i < il; i++) {
-                var vertex = vertices[i].clone();
-                
-                var z = new Complex(vertex.x, vertex.y);
-                z = Complex.atanh(z).multiplyScalar(4 / Math.PI);
-
-                vertex.x = z.re;
-                vertex.y = z.im;
-                geometry.vertices.push(vertex);
-            }
-
-            var faces = child.geometry.faces;
-            for (var i = 0, il = faces.length; i < il; i++) {
-                geometry.faces.push(faces[i]);
-            }
-
-            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
-        }
-    });
-
-    return newModel;
-});
-
 var toolFunction = new MeshTool("Function", function (object3D, fn) {
     var newModel = new THREE.Object3D();
 
@@ -179,6 +149,69 @@ var toolFunction = new MeshTool("Function", function (object3D, fn) {
 
     return newModel;
 });
+
+var toolOffset = new MeshTool("Function", function (object3D, thickness) {
+    var newModel = new THREE.Object3D();
+    var consolidated = colsolidateGeometry(object3D);
+
+    var geometry = new THREE.Geometry();
+    consolidated.computeFaceNormals();
+    consolidated.computeVertexNormals();
+    var vertices = consolidated.vertices;
+    var normals = [vertices.length];
+
+    for ( f = 0, fl = consolidated.faces.length; f < fl; f ++ ) {
+        face = consolidated.faces[ f ];
+
+        if ( face instanceof THREE.Face3 ) {
+            normals[face.a] = face.vertexNormals[ 0 ];
+            normals[face.b] = face.vertexNormals[ 1 ];
+            normals[face.c] = face.vertexNormals[ 2 ];
+        } else if ( face instanceof THREE.Face4 ) {
+            normals[face.a] = face.vertexNormals[ 0 ];
+            normals[face.b] = face.vertexNormals[ 1 ];
+            normals[face.c] = face.vertexNormals[ 2 ];
+            normals[face.d] = face.vertexNormals[ 3 ];
+        }
+    }
+
+    for (var i = 0, il = vertices.length; i < il; i++) {
+        var vertex = vertices[i].clone();
+        var widthRatio = Math.abs(vertex.y);
+
+        if (normals[i].z < 0)
+            normals[i] = normals[i].multiplyScalar(-1);
+
+    //   var azimuth = Math.atan2(normals[i].z, Math.sqrt(normals[i].x * normals[i].x + normals[i].y * normals[i].y));
+        if (vertex.z > 0.04) {
+            normals[i].x = 0;
+            normals[i].y = 0;
+            normals[i].z = 2/3;
+        }
+
+        if (vertex.z < -0.04) {
+            normals[i].z = 0;
+        }
+
+        var stretch = 1 - vertex.z / 0.08 + 0.08
+        stretch *= widthRatio * 1/3;
+        normals[i].x *= stretch;
+        normals[i].y *= stretch;
+        
+        vertex.add(normals[i].multiplyScalar(thickness))
+        geometry.vertices.push(vertex);
+    }
+
+    var faces = consolidated.faces;
+    for (var i = 0, il = faces.length; i < il; i++) {
+        geometry.faces.push(faces[i]);
+    }
+
+    newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, basicMaterial));
+
+    return newModel;
+});
+
 
 var toolIdentity = new MeshTool("Identity", function (object3D, time) {
     var newModel = new THREE.Object3D();

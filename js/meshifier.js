@@ -89,7 +89,7 @@ function init() {
     });
 
    // loader.load("resources/obj/kleinquartic.4.obj");
-    loader.load("resources/obj/4-5.3.obj");
+    loader.load("resources/obj/4-5.26.obj");
 
     settings = new Settings();
     panels = new Panels();
@@ -162,9 +162,20 @@ var translate = function(vertex) {
 
 var roll = function(vertex) {         
     var n = 4;
+    var sign = 1;
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
-    vertex.z = vertex.x * 1/Math.tan(Math.asin(vertex.x / radius));
+    var phi = vertex.x / radius;
+    var dist = radius + sign * vertex.z * Math.cos(vertex.y * Math.PI / 2) * 2;
+    vertex.z = dist * Math.cos(phi);
+    vertex.x = dist * Math.sin(phi);
+
+ //   vertex.z = vertex.x * 1/Math.tan(Math.asin(vertex.x / radius));
+    return vertex;
+};
+
+var scale = function(vertex) {         
+    vertex.multiplyScalar(0.13);
     return vertex;
 };
 
@@ -190,10 +201,13 @@ function render() {
 
     	else if (settings.isHyperbolic.checked) {
             model = toolHyperbolic.method(model, time);
-            model = toolFunction.method(model, rotate);
-            model = toolFunction.method(model, translate);
-            model = toolFunction.method(model, circleToStrip);
-        	model = toolFunction.method(model, roll);
+             model = toolFunction.method(model, rotate);
+             model = toolFunction.method(model, translate);
+             model = toolFunction.method(model, circleToStrip);
+
+             model = toolOffset.method(model, 0.001 / 0.13);
+             model = toolFunction.method(model, roll);
+        	// model = toolFunction.method(model, scale);
     	}
     }
 

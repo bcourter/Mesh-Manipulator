@@ -43,14 +43,14 @@ Disc.prototype.initFaces = function (geometries) {
             //       if (face.edgeCenters[i].magnitudeSquared > 0.9) 
             //          continue;
 
-            if (c.radiusSquared() < this.radiusLimit)
-                continue;
+            // if (c.radiusSquared() < this.radiusLimit)
+            //     continue;
 
             var mobius = edge.Circline.asMobius();
             var image = face.conjugate().transform(mobius);
 
-            if (image.center.modulusSquared() > this.circleLimit)
-                continue;
+      //      if (image.center.modulusSquared() > this.circleLimit)
+      //         continue;
 
 			 var arg = image.center.argument();
 			 if (arg <= -0.001 || arg > Math.PI + 0.001 )
@@ -64,6 +64,9 @@ Disc.prototype.initFaces = function (geometries) {
                 continue;
             if (p.x < -0.5)
                 continue;
+            if (Math.abs(p.y) > this.circleLimit)
+                continue;
+
 
             if (faceCenters.contains(image.center))
                 continue;
