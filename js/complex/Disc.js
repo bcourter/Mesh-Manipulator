@@ -1,4 +1,4 @@
-function Disc(region, circleLimit, maxRegions, geometry, materials) {
+function Disc(region, circleLimit, maxRegions, geometry, fn) {
     this.region = region;
     this.circleLimit = circleLimit;
     this.maxRegions = maxRegions;
@@ -14,17 +14,17 @@ function Disc(region, circleLimit, maxRegions, geometry, materials) {
     this.drawCount = 1;
     this.totalDraw = 0;
 
-    this.geometry = this.initFaces(this.initialFace.geometry);
+    this.fn = fn;
+    this.geometry = this.initFaces();
 
-    this.model = new THREE.Object3D();
-    this.model.add(THREE.SceneUtils.createMultiMaterialObject(this.geometry, materials));
+    this.geometry = toolFunction.method(this.geometry, fn);
 }
 
-Disc.prototype.initFaces = function (geometry) {
+Disc.prototype.initFaces = function () {
     var seedFace = this.initialFace;
     var faceQueue = [seedFace];
     var faceCenters = new ComplexCollection();
-    var geom = geometry.clone();
+    var geom = this.initialFace.geometry.clone();
 
     var count = 1;
     while (faceQueue.length > 0 && count < this.maxRegions) {
@@ -51,15 +51,13 @@ Disc.prototype.initFaces = function (geometry) {
       //      if (image.center.modulusSquared() > this.circleLimit)
       //         continue;
 
-			 var arg = image.center.argument();
-			 if (arg <= -0.001 || arg > Math.PI + 0.001 )
-			 	continue;
+            var arg = image.center.argument();
+            if (arg <= -0.001 || arg > Math.PI + 0.001 )
+            	continue;
 
-             var p = new THREE.Vector3(image.center.re, image.center.im, 0);
-             p = rotate(p);
-             p = translate(p);
-             p = circleToStrip(p);
-             if (p.x > 1.4) 
+            var p = new THREE.Vector3(image.center.re, image.center.im, 0);
+            p = this.fn(p);
+            if (p.x > 1.4) 
                 continue;
             if (p.x < -0.5)
                 continue;
@@ -79,6 +77,7 @@ Disc.prototype.initFaces = function (geometry) {
     }
 
     this.circleMaxModulus = faceCenters.max;
+
 	return geom;
 };
 

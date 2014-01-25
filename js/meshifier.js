@@ -1,4 +1,4 @@
-var renderer, camera, settings, panels, materials, model, objModel, lightGeometry;
+var renderer, camera, settings, panels, materials, geometry, objModel, lightGeometry;
 var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 
 init();
@@ -89,7 +89,7 @@ function init() {
     });
 
    // loader.load("resources/obj/kleinquartic.4.obj");
-    loader.load("resources/obj/4-5.30-1.obj");
+    loader.load("resources/obj/4-5.37.obj");
 
     settings = new Settings();
     panels = new Panels();
@@ -180,10 +180,31 @@ var scale = function(vertex) {
     return vertex;
 };
 
-
 function linearToHyperbolic(x) {
     x++;  // to scale...
     return Math.log(x + Math.sqrt(x * x - 1)); // arcosh(x)
+}
+
+function basicMeshFromGeometry(geometry) {
+    return new THREE.Mesh(geometry, new THREE.MeshLambertMaterial());
+}
+
+function mergeAllVertices(object3D) {
+    var offset = 0;
+    var geometry = new THREE.Geometry();
+    object3D.traverse(function (child) {
+        if (child instanceof THREE.Mesh) {
+            if (geometry.vertices.length == 0) {
+                geometry = child.geometry.clone();
+                return;
+            }
+
+            THREE.GeometryUtils.merge(geometry, child.geometry);
+        }
+    });
+
+    geometry.mergeVertices();
+    return geometry;
 }
 
 function render() {
@@ -193,28 +214,45 @@ function render() {
     if (objModel === undefined)
         return;
 
-    if (model === undefined) {
-        model = objModel;
+    if (geometry === undefined) {
+        geometry = mergeAllVertices(objModel);
 
     	if (settings.is4dExplode.checked) {
-        	model = tool4dExplode.method(model, time);
+        	geometry = tool4dExplode.method(geometry, time);
     	} 
 
     	else if (settings.isHyperbolic.checked) {
-            model = toolHyperbolic.method(model, time);
-             model = toolFunction.method(model, rotate);
-             model = toolFunction.method(model, translate);
-             model = toolFunction.method(model, circleToStrip);
+            geometry = toolHyperbolic.method(geometry, time, function(p) {
+                p = rotate(p);
+                p = translate(p);
+                p = circleToStrip(p);
+                return p;
+            } );
 
-             model = toolOffset.method(model, 0.001 / 0.13);
-           //  model = toolFunction.method(model, roll);
-            // model = toolFunction.method(model, scale);
-        	// model = toolIdentity.method(model);
+            geometry = toolOffset.method(geometry, 0.001 / 0.13);
+            geometry = toolFunction.method(geometry, roll);
+            // geometry = toolFunction.method(geometry, scale);
+        	// geometry = toolIdentity.method(geometry);
     	}
     }
 
+    material = [
+        new THREE.MeshLambertMaterial( { 
+            color: 0x222222, 
+            side: THREE.DoubleSide,
+            shading: THREE.FlatShading, 
+            transparent: true,  
+            opacity: 0.5
+        } ),
+        new THREE.MeshBasicMaterial( { 
+            color: 0xEEEEEE, 
+            shading: THREE.FlatShading, 
+            wireframe: true
+        } )
+    ];
+
     var scene = new THREE.Scene();
-    scene.add(model.clone());
+    scene.add(THREE.SceneUtils.createMultiMaterialObject(geometry, material));
 
     var ambientLight = new THREE.AmbientLight(0x666666);
     scene.add(ambientLight);
@@ -247,7 +285,7 @@ function geometriesFromObj(objModel) {
             for (var i = 0, il = faces.length; i < il; i++) 
                 geometry.faces.push(faces[i]);
 
-            newModel.add(THREE.SceneUtils.createMultiMaterialObject(geometry, materials));
+            newModel.add(basicMeshFromGeometry(geometry));
         }
     });
 
@@ -255,7 +293,7 @@ function geometriesFromObj(objModel) {
 }
 
 function saveObj() {
-    var op = THREE.saveToObj(model);
+    var op = THREE.saveToObj(basicMeshFromGeometry(geometry));
 
     var newWindow = window.open("");
     newWindow.document.write(op);
