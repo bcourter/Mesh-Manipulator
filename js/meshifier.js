@@ -1,4 +1,4 @@
-var renderer, camera, settings, panels, materials, geometry, objModel, lightGeometry;
+var renderer, camera, settings, panels, geometry, objModel, lightGeometry;
 var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 
 init();
@@ -46,50 +46,28 @@ function init() {
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
 
-	materials = [
-		new THREE.MeshLambertMaterial( { 
-			color: 0x222222, 
-			side: THREE.DoubleSide,
-			shading: THREE.FlatShading, 
-			transparent: true,  
-			opacity: 0.5
-		} ),
-		new THREE.MeshBasicMaterial( { 
-			color: 0xEEEEEE, 
-			shading: THREE.FlatShading, 
-			wireframe: true
-		} )
-	];
-
-    var loader = new THREE.OBJLoader();
-    loader.addEventListener('load', function (event) {
-        objModel = event.content;
-
+    var loader = new THREE.STLLoader();
+    loader.addEventListener( 'load', function ( event ) {
+        var geometry = event.content;
+        geometry.computeBoundingBox();
         var box = new THREE.Box3();
-        objModel.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                child.geometry.computeBoundingBox();
-                box.union(child.geometry.boundingBox);  //TBD does this accidentaly cause it to include zero from the first time?
-            }
-        });
+        box.union(geometry.boundingBox);  //TBD does this accidentaly cause it to include zero from the first time?
+        var center = box.center();
+  //      var scale = box.size().length() * 0.5;
+        var scale = 1;
+        var vertices = geometry.vertices;
+        for (var i = 0; i < vertices.length; i++) {  
+            geometry.vertices[i] = vertices[i].sub(center).multiplyScalar(scale);
+        }
 
-        objModel.traverse(function (child) {
-            if (child instanceof THREE.Mesh) {
-                var mesh = child;
-                var center = box.center();
-          //      var scale = box.size().length() * 0.5;
-                var scale = 1;
+        objModel = basicMeshFromGeometry(geometry);
+    } );
 
-                var vertices = mesh.geometry.vertices;
-                for (var i = 0; i < vertices.length; i++) {  
-                    mesh.geometry.vertices[i] = vertices[i].sub(center).multiplyScalar(scale);
-                }
-            };
-        });
-    });
+    loader.load( 'resources/obj/4-5.37-2.stl' );
+
 
    // loader.load("resources/obj/kleinquartic.4.obj");
-    loader.load("resources/obj/4-5.37.obj");
+    //loader.load("resources/obj/4-5.37.obj");
 
     settings = new Settings();
     panels = new Panels();
