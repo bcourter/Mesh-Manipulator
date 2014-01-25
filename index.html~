@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Fractal Jig</title>
+    <link rel="stylesheet" href="Meshifier.css" />
+</head>
+<body>
+    <div id="toolbar">
+        <label>
+            <input type="checkbox" id='show4dExplode' />
+            4d Explode
+        </label>
+        <label>
+            <input type="checkbox" id='showHyperbolic' />
+            Hyperbolic
+        </label>
+        <label>
+            <input type="button" id='saveObj' />
+            Save OBJ
+        </label>
+    </div>
+
+    <div id="4dExplodePanel" class="panel">
+        <label>
+            <input type="checkbox" id='is4dExplode' />
+            4D Explode
+        </label>
+    </div>
+
+    <div id="hyperbolicPanel" class="panel">
+        <label>
+            <input type="checkbox" id='isHyperbolic' checked />
+            Hyperbolic
+        </label>
+    </div>
+
+    <script src="js/three/three.js"></script>
+    <script src="js/three/controls/OrbitControls.js"></script>
+    <script src="js/three/controls/TrackballControls.js"></script>
+    <script src="js/three/loaders/OBJLoader.js"></script>
+
+    <script src="js/four/Four.js"></script>
+    <script src="js/four/math/Box4.js"></script>
+    <script src="js/four/math/Matrix5.js"></script>
+    <script src="js/four/core/Geometry.js"></script>
+    <script src="js/four/core/Face3.js"></script>
+    <script src="js/four/core/Face4.js"></script>
+    <script src="js/four/extras/geometries/Object3DGeometry.js"></script>
+
+    <script src="js/complex/Complex.js"></script>
+    <script src="js/complex/Circline.js"></script>
+    <script src="js/complex/Face.js"></script>
+    <script src="js/complex/Disc.js"></script>
+
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/meshtool.js"></script>
+    <script src="js/meshifier.js"></script>
+
+</body>
+</html>
