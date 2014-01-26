@@ -23,8 +23,9 @@ function Disc(region, circleLimit, maxRegions, geometry, fn) {
 Disc.prototype.initFaces = function () {
     var seedFace = this.initialFace;
     var faceQueue = [seedFace];
-    var faceCenters = new ComplexCollection();
-    var geom = this.initialFace.geometry.clone();
+ //   var faceCenters = new ComplexCollection();
+    var faceCenters = [];
+    var geom = this.initialFace.geometry[0].clone();
 
     var count = 1;
     while (faceQueue.length > 0 && count < this.maxRegions) {
@@ -52,7 +53,7 @@ Disc.prototype.initFaces = function () {
       //         continue;
 
             var arg = image.center.argument();
-            if (arg <= -0.001 || arg > Math.PI + 0.001 )
+            if (arg <= -0.1 || arg > Math.PI + 0.1 )
             	continue;
 
             var p = new THREE.Vector3(image.center.re, image.center.im, 0);
@@ -64,13 +65,27 @@ Disc.prototype.initFaces = function () {
             if (Math.abs(p.y) > this.circleLimit)
                 continue;
 
+         //   if (faceCenters.contains(image.center))
+          //      continue;
 
-            if (faceCenters.contains(image.center))
+            var halt = false
+            for (var j = 0; j < faceCenters.length; j++) {
+                if (Complex.equals(faceCenters[j], image.center))
+                    halt = true;
+            }
+            if (halt)
                 continue;
 
-            THREE.GeometryUtils.merge(geom, image.geometry);
+            var n = 0;
+            if (Math.abs(p.y) > 0.45)
+                n = 1;
+            if (Math.abs(p.y) > 0.75)
+                n = 2;
+
+            THREE.GeometryUtils.merge(geom, image.geometry[n]);
             faceQueue.unshift(image);
-            faceCenters.add(image.center);
+        //    faceCenters.add(image.center);
+            faceCenters.push(image.center);
             count++;
         //    break;
         }

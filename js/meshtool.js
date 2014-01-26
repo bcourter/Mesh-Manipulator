@@ -55,7 +55,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometryIn, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (geometryIn, time, fn) {
-    disc = new Disc(new Region(4, 5), 0.99, 444, geometryIn, fn);
+    disc = new Disc(new Region(4, 5), 0.991, 666, geometryIn, fn);
     return disc.geometry;
 });
 

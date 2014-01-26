@@ -30,67 +30,58 @@ Face.create = function (region, geometry) {
     var p = region.p;
     var increment = Mobius.createRotation(2 * Math.PI / p);
     var midvertex = region.p1;
-    
-    var geom = geometry.clone(); 
-	geom.computeBoundingBox();
-	var offset = geom.boundingBox.max.sub(geom.boundingBox.min);
 
-    for (var i = 0; i < geom.vertices.length; i++) {
-		geom.vertices[i].x += offset.x/2;
-		geom.vertices[i].y += offset.y/2;
-    }
-    
-    var face = new Face(region, Complex.zero, new THREE.Geometry(), false);
- 	origVertices = geom.vertices;
+	geometry[0].computeBoundingBox();
+	var offset = geometry[0].boundingBox.max.sub(geometry[0].boundingBox.min);
 
-    var edge = new Edge(this, region.c, midvertex, midvertex.transform(increment.inverse()));
-    face.edges = [];
+    var face = new Face(region, Complex.zero, [], false);
+    for (var n = 0; n < geometry.length; n++) {
+        var geom = geometry[n].clone(); 
+        for (var i = 0; i < geom.vertices.length; i++) {
+    		geom.vertices[i].x += offset.x/2;
+    		geom.vertices[i].y += offset.y/2;
+        }
+        
+        face.geometry[n] = new THREE.Geometry();
+     	origVertices = geom.vertices;
 
-    var geomC = geom.clone(); 
- 	var faces = geomC.faces;
-	for (var i = 0; i < faces.length; i++) {
-		var tmp = faces[i].a;
-		faces[i].a = faces[i].b;
-		faces[i].b = tmp;
-	}
+        var edge = new Edge(this, region.c, midvertex, midvertex.transform(increment.inverse()));
+        face.edges = [];
 
-    var rotation = Mobius.identity;
-    for (var i = 0; i < p; i++) {
-        rotation = Mobius.multiply(rotation, increment);
-        face.edges[i] = edge.transform(rotation);
-       
-    	var newGeom = geom.clone(); 
-    	var newGeomC = geomC.clone(); 
- 		var newVertices = newGeom.vertices;
- 		var newVerticesC = newGeomC.vertices;
+        var geomC = geom.clone(); 
+     	var faces = geomC.faces;
+    	for (var i = 0; i < faces.length; i++) {
+    		var tmp = faces[i].a;
+    		faces[i].a = faces[i].b;
+    		faces[i].b = tmp;
+    	}
 
+        var rotation = Mobius.identity;
+        for (var i = 0; i < p; i++) {
+            rotation = Mobius.multiply(rotation, increment);
+            face.edges[i] = edge.transform(rotation);
+           
+        	var newGeom = geom.clone(); 
+        	var newGeomC = geomC.clone(); 
+     		var newVertices = newGeom.vertices;
+     		var newVerticesC = newGeomC.vertices;
 
+    		for (var j = 0; j < geom.vertices.length; j++) {
+    			var z = new Complex(geom.vertices[j].x, geom.vertices[j].y);
+    			var zc = z.conjugate().transform(rotation);
+    			z = z.transform(rotation);
 
-		for (var j = 0; j < geom.vertices.length; j++) {
-			var z = new Complex(geom.vertices[j].x, geom.vertices[j].y);
-			var zc = z.conjugate().transform(rotation);
-			z = z.transform(rotation);
+    			newVertices[j] = new THREE.Vector3(z.re, z.im, geom.vertices[j].z);
+    			newVerticesC[j] = new THREE.Vector3(zc.re, zc.im, geom.vertices[j].z);
+    		}
 
-			newVertices[j] = new THREE.Vector3(z.re, z.im, geom.vertices[j].z);
-			newVerticesC[j] = new THREE.Vector3(zc.re, zc.im, geom.vertices[j].z);
-		}
+            THREE.GeometryUtils.merge(face.geometry[n], newGeom);
+            THREE.GeometryUtils.merge(face.geometry[n], newGeomC);
+        }
 
-		// newGeom.computeFaceNormals();
-  //   	newGeom.computeVertexNormals();
-		// newGeomC.computeFaceNormals();
-  //   	newGeomC.computeVertexNormals();
-
-  //   	for (var k = 0, kl = newGeomC.faces.length; k < kl; k++) {
-  //   		var normals = newGeomC.faces[k].vertexNormals;
-  //   		for (var j = 0, jl = normals.length; j < jl; j++) 
-  //     	    	normals[j] = normals[j].multiplyScalar(-1);
-  //     	}
-
-        THREE.GeometryUtils.merge(face.geometry, newGeom);
-        THREE.GeometryUtils.merge(face.geometry, newGeomC);
+        face.geometry[n].mergeVertices();
     }
 
-    face.geometry.mergeVertices();
     return face;
 };
 
@@ -101,41 +92,49 @@ Face.createFromExisting = function (previous, edges, center, geometry, isFlipped
 };
 
 Face.prototype.transform = function (mobius) {
-	var geom = this.geometry.clone(); 
- 	var vertices = geom.vertices;
+    var geom = [];
 
-	var newVertices = [];
-	for (var i = 0; i < vertices.length; i++) {
-		newVertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
-		var x = newVertices[i].x;
-		var y = newVertices[i].y;
-		var r = Math.sqrt(x * x + y * y);
-		newVertices[i].z = vertices[i].z;
-	}
-	
-	geom.vertices = newVertices;
+    for (var n = 0; n < this.geometry.length; n++) {
+    	geom[n] = this.geometry[n].clone(); 
+     	var vertices = geom[n].vertices;
 
-	var p = this.region.p;
-	var edges = [];
-   	for (var i = 0; i < p; i++) {
-	    edges[i] = this.edges[i].transform(mobius);
-	}
+    	var newVertices = [];
+    	for (var i = 0; i < vertices.length; i++) {
+    		newVertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
+    		var x = newVertices[i].x;
+    		var y = newVertices[i].y;
+    		var r = Math.sqrt(x * x + y * y);
+    		newVertices[i].z = vertices[i].z;
+    	}
+    	
+    	geom[n].vertices = newVertices;
+    }
+
+    var p = this.region.p;
+    var edges = [];
+    for (var i = 0; i < p; i++) {
+        edges[i] = this.edges[i].transform(mobius);
+    }
 
     return Face.createFromExisting(this, edges, this.center.transform(mobius), geom, this.isFlipped);
 };
 
 Face.prototype.conjugate = function () {
-	var geom = this.geometry.clone(); 
- 	var vertices = geom.vertices;
-	for (var i = 0; i < vertices.length; i++) 
-		vertices[i] = new THREE.Vector3(vertices[i].x, -vertices[i].y, vertices[i].z);
+    var geom = [];
 
-	var faces = geom.faces;
-	for (var i = 0; i < faces.length; i++) {
-		var tmp = faces[i].a;
-		faces[i].a = faces[i].b;
-		faces[i].b = tmp;
-	}
+    for (var n = 0; n < this.geometry.length; n++) {
+    	geom[n] = this.geometry[n].clone(); 
+     	var vertices = geom[n].vertices;
+    	for (var i = 0; i < vertices.length; i++) 
+    		vertices[i] = new THREE.Vector3(vertices[i].x, -vertices[i].y, vertices[i].z);
+
+    	var faces = geom[n].faces;
+    	for (var i = 0; i < faces.length; i++) {
+    		var tmp = faces[i].a;
+    		faces[i].a = faces[i].b;
+    		faces[i].b = tmp;
+    	}
+    }
 
 	var p = this.region.p;
 	var edges = [];

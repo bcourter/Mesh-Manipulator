@@ -1,4 +1,6 @@
-var renderer, camera, settings, panels, geometry, objModel, lightGeometry;
+var renderer, camera, settings, panels, geometry, lightGeometry;
+var objModel = [];
+var objModelCount = 3;
 var lastTime = 0, lastAnimation = 0, lastRotation = 0;
 
 init();
@@ -46,32 +48,39 @@ function init() {
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
 
-    var loader = new THREE.STLLoader();
-    loader.addEventListener( 'load', function ( event ) {
-        var geometry = event.content;
-        geometry.computeBoundingBox();
-        var box = new THREE.Box3();
-        box.union(geometry.boundingBox);  //TBD does this accidentaly cause it to include zero from the first time?
-        var center = box.center();
-  //      var scale = box.size().length() * 0.5;
-        var scale = 1;
-        var vertices = geometry.vertices;
-        for (var i = 0; i < vertices.length; i++) {  
-            geometry.vertices[i] = vertices[i].sub(center).multiplyScalar(scale);
-        }
+        var prefix = 'resources/obj/4-5.39-';
+        var extension = '.stl';
 
-        objModel = basicMeshFromGeometry(geometry);
-    } );
-
-    loader.load( 'resources/obj/4-5.37-2.stl' );
-
-
-   // loader.load("resources/obj/kleinquartic.4.obj");
-    //loader.load("resources/obj/4-5.37.obj");
-
+        var loader0 = new THREE.STLLoader();
+        loader0.addEventListener('load', function (event) { objModel[0] = basicMeshFromGeometry(loadGeometry(event.content)); });
+        loader0.load(prefix + 0 + extension);
+    
+        var loader1 = new THREE.STLLoader();
+        loader1.addEventListener('load', function (event) { objModel[1] = basicMeshFromGeometry(loadGeometry(event.content)); });
+        loader1.load(prefix + 1 + extension);
+    
+        var loader2 = new THREE.STLLoader();
+        loader2.addEventListener('load', function (event) { objModel[2] = basicMeshFromGeometry(loadGeometry(event.content)); });
+        loader2.load(prefix + 2 + extension);
+    
     settings = new Settings();
     panels = new Panels();
 	panelRefresh();
+}
+
+function loadGeometry(geometry) {
+    geometry.computeBoundingBox();
+    var box = new THREE.Box3();
+    box.union(geometry.boundingBox);  //TBD does this accidentaly cause it to include zero from the first time?
+    var center = box.center();
+//      var scale = box.size().length() * 0.5;
+    var scale = 1;
+    var vertices = geometry.vertices;
+    for (var i = 0; i < vertices.length; i++) {  
+        geometry.vertices[i] = vertices[i].sub(center).multiplyScalar(scale);
+    }
+
+    return geometry;
 }
 
 function panelRefresh() {
@@ -189,26 +198,31 @@ function render() {
     var time = new Date().getTime() / 1000;
     lastTime = time;
 
-    if (objModel === undefined)
-        return;
+    for (var i = 0; i < objModelCount; i++) {
+        if (objModel[i] === undefined)
+            return;
+    }
 
     if (geometry === undefined) {
-        geometry = mergeAllVertices(objModel);
+        var objGeometry = [];
+        for (var i = 0; i < objModelCount; i++) {
+            objGeometry[i] = mergeAllVertices(objModel[i])
+        }
 
     	if (settings.is4dExplode.checked) {
         	geometry = tool4dExplode.method(geometry, time);
     	} 
 
     	else if (settings.isHyperbolic.checked) {
-            geometry = toolHyperbolic.method(geometry, time, function(p) {
+            geometry = toolHyperbolic.method(objGeometry, time, function(p) {
                 p = rotate(p);
                 p = translate(p);
                 p = circleToStrip(p);
                 return p;
             } );
 
-            geometry = toolOffset.method(geometry, 0.001 / 0.13);
-            geometry = toolFunction.method(geometry, roll);
+         //   geometry = toolOffset.method(geometry, 0.001 / 0.13);
+        //    geometry = toolFunction.method(geometry, roll);
             // geometry = toolFunction.method(geometry, scale);
         	// geometry = toolIdentity.method(geometry);
     	}
@@ -246,28 +260,6 @@ function render() {
     scene.add(directionalLight);
 
     renderer.render(scene, camera);
-}
-
-function geometriesFromObj(objModel) {
-    var newModel = new THREE.Object3D();
-
-    objModel.traverse(function (child) {
-        if (child instanceof THREE.Mesh) {
-            var geometry = new THREE.Geometry();
-
-            var vertices = child.geometry.vertices;
-            for (var i = 0, il = vertices.length; i < il; i++) 
-                geometry.vertices.push(vertices[i].clone());
-
-            var faces = child.geometry.faces;
-            for (var i = 0, il = faces.length; i < il; i++) 
-                geometry.faces.push(faces[i]);
-
-            newModel.add(basicMeshFromGeometry(geometry));
-        }
-    });
-
-    return [ newModel ];
 }
 
 function saveObj() {
