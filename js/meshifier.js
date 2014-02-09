@@ -148,18 +148,26 @@ var translate = function(vertex) {
 };
 
 var roll = function(vertex) {         
-    var n = 5;
-    var sign = -1;
+    var n = 4;
+    var sign = 1;
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
 
     var thickness = 0.25 / 25.4 / 0.13;
     var radiusOffset = 0;
-    if (sign = -1) {
+    if (sign == -1) {
         if (vertex.z < -0.02) {
             radiusOffset = thickness;
         } else {
             radiusOffset = -thickness/5;
+        }
+    }
+
+    if (sign == 1) {
+        if (vertex.z < -0.02) {
+            radiusOffset = -thickness/5;
+        } else {
+            radiusOffset = thickness;
         }
     }
 
