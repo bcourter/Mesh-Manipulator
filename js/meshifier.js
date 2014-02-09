@@ -48,7 +48,7 @@ function init() {
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
 
-        var prefix = 'resources/obj/4-5.39-';
+        var prefix = 'resources/obj/4-5.40-';
         var extension = '.stl';
 
         var loader0 = new THREE.STLLoader();
@@ -109,7 +109,6 @@ var circleToStrip = function(vertex) {
 
     vertex.x = z.re;
     vertex.y = z.im;
-    vertex.z *= Math.cos(vertex.y * Math.PI / 2) 
     return vertex;
 };
 
@@ -149,12 +148,24 @@ var translate = function(vertex) {
 };
 
 var roll = function(vertex) {         
-    var n = 4;
-    var sign = 1;
+    var n = 5;
+    var sign = -1;
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
+
+    var thickness = 0.25 / 25.4 / 0.13;
+    var radiusOffset = 0;
+    if (sign = -1) {
+        if (vertex.z < -0.02) {
+            radiusOffset = thickness;
+        } else {
+            radiusOffset = -thickness/5;
+        }
+    }
+
+    var depth = vertex.z * Math.cos(vertex.y * Math.PI / 2);
     var phi = vertex.x / radius;
-    var dist = radius + sign * vertex.z * 2;
+    var dist = radius + sign * depth * 2 + radiusOffset;
     vertex.z = dist * Math.cos(phi);
     vertex.x = dist * Math.sin(phi);
 
@@ -221,8 +232,8 @@ function render() {
                 return p;
             } );
 
-         //   geometry = toolOffset.method(geometry, 0.001 / 0.13);
-        //    geometry = toolFunction.method(geometry, roll);
+        //    geometry = toolOffset.method(geometry, 0.001 * 0.13);
+            geometry = toolFunction.method(geometry, roll);
             // geometry = toolFunction.method(geometry, scale);
         	// geometry = toolIdentity.method(geometry);
     	}
