@@ -14,6 +14,19 @@ function init() {
     camera = new THREE.PerspectiveCamera(5, window.innerWidth / window.innerHeight, 1, 1000);
     camera.position.z = 70;
 
+    var cookie = getCookie("view");
+    if (cookie !== undefined) {
+        var viewdata = cookie.split(',');
+
+        camera.position.x = viewdata[0];
+        camera.position.y = viewdata[1];
+        camera.position.z = viewdata[2];
+
+        camera.rotation.x = viewdata[3];
+        camera.rotation.y = viewdata[4];
+        camera.rotation.z = viewdata[5];
+    }
+
 	controls = new THREE.OrbitControls(camera);
 
 	controls.rotateSpeed = 2.0;
@@ -147,27 +160,31 @@ var translate = function(vertex) {
     return vertex;
 };
 
+var offset = 0.25 / 25.4 / 0.13;
+var offsetZOnly = 0.5;
 var roll = function(vertex) {         
     var n = 4;
     var sign = 1;
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
 
-    var thickness = 0.25 / 25.4 / 0.13;
+    var thickness = offset * offsetZOnly * 2;
+
+    var bottomScale = 0.2;
     var radiusOffset = 0;
     if (sign == -1) {
         if (vertex.z < -0.02) {
             radiusOffset = thickness;
         } else {
-            radiusOffset = -thickness/5;
+            radiusOffset = 0;
         }
     }
 
     if (sign == 1) {
         if (vertex.z < -0.02) {
-            radiusOffset = -thickness/5;
+            radiusOffset = -thickness;
         } else {
-            radiusOffset = thickness;
+            radiusOffset = bottomScale * thickness;
         }
     }
 
@@ -213,7 +230,9 @@ function mergeAllVertices(object3D) {
     return geometry;
 }
 
+var frame = 0;
 function render() {
+    frame++;
     var time = new Date().getTime() / 1000;
     lastTime = time;
 
@@ -222,6 +241,7 @@ function render() {
             return;
     }
 
+    var thickness = offset / 4 * (1 - offsetZOnly); //  / 2 * (1 + Math.sin(time));
     if (geometry === undefined) {
         var objGeometry = [];
         for (var i = 0; i < objModelCount; i++) {
@@ -240,30 +260,43 @@ function render() {
                 return p;
             } );
 
-        //    geometry = toolOffset.method(geometry, 0.001 * 0.13);
             geometry = toolFunction.method(geometry, roll);
-            // geometry = toolFunction.method(geometry, scale);
+            geometry = toolOffset.method(geometry, thickness);
+
+            //geometry = toolFunction.method(geometry, scale);
         	// geometry = toolIdentity.method(geometry);
     	}
     }
 
+    var animGeometry = geometry;
+
+ 
     material = [
-        new THREE.MeshLambertMaterial( { 
-            color: 0x222222, 
+        new THREE.MeshPhongMaterial( { 
+            color: 0x000000, 
             side: THREE.DoubleSide,
             shading: THREE.FlatShading, 
-            transparent: true,  
-            opacity: 0.5
+            specular: 0x999999,
+            emissive: 0x000000,
+            shininess: 10 
         } ),
+        // new THREE.MeshLambertMaterial( { 
+        //     color: 0x222222, 
+        //     side: THREE.DoubleSide,
+        //     shading: THREE.FlatShading, 
+        //     transparent: true,  
+        //     opacity: 0.5
+        // } ),
         new THREE.MeshBasicMaterial( { 
             color: 0xEEEEEE, 
             shading: THREE.FlatShading, 
-            wireframe: true
+            wireframe: true,
+            wireframeLinewidth: 2
         } )
     ];
 
     var scene = new THREE.Scene();
-    scene.add(THREE.SceneUtils.createMultiMaterialObject(geometry, material));
+    scene.add(THREE.SceneUtils.createMultiMaterialObject(animGeometry, material));
 
     var ambientLight = new THREE.AmbientLight(0x666666);
     scene.add(ambientLight);
@@ -275,10 +308,24 @@ function render() {
     scene.add(directionalLight);
 
     var directionalLight = new THREE.DirectionalLight(0x8888aa);
-    directionalLight.position.set(-1, -1, -1).normalize();
+    directionalLight.position.set(-1, 1, 1).normalize();
     scene.add(directionalLight);
 
     renderer.render(scene, camera);
+
+    if (frame % 100 == 0) {
+        var viewdata = [6];
+
+        viewdata[0] = camera.position.x;
+        viewdata[1] = camera.position.y;
+        viewdata[2] = camera.position.z;
+
+        viewdata[3] = camera.rotation.x;
+        viewdata[4] = camera.rotation.y;
+        viewdata[5] = camera.rotation.z;
+
+        setCookie("view", viewdata.join()); 
+    }
 }
 
 function saveObj() {
@@ -328,4 +375,25 @@ THREE.saveToObj = function (object3d) {
 	});
 
     return s;
+}
+
+    // from http://stackoverflow.com/questions/4825683/how-do-i-create-and-read-a-value-from-cookie
+function setCookie(c_name,value,exdays) {
+    var exdate=new Date();
+    exdate.setDate(exdate.getDate() + exdays);
+    var c_value=escape(value) + 
+    ((exdays==null) ? "" : ("; expires="+exdate.toUTCString()));
+    document.cookie=c_name + "=" + c_value;
+}
+
+function getCookie(c_name) {
+    var i,x,y,ARRcookies=document.cookie.split(";");
+    for (i=0;i<ARRcookies.length;i++) {
+        x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
+        y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
+        x=x.replace(/^\s+|\s+$/g,"");
+        if (x==c_name) {
+            return unescape(y);
+        }
+    }
 }

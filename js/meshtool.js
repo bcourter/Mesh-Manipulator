@@ -75,7 +75,7 @@ var toolFunction = new MeshTool("Function", function (geometryIn, fn) {
     return geometry;
 });
 
-var toolOffset = new MeshTool("Function", function (geometryIn, thickness) {
+var toolOffset = new MeshTool("Offset", function (geometryIn, thickness) {
     var consolidated = geometryIn.clone();
 
     var geometry = new THREE.Geometry();
@@ -103,23 +103,8 @@ var toolOffset = new MeshTool("Function", function (geometryIn, thickness) {
         var vertex = vertices[i].clone();
         var widthRatio = Math.abs(vertex.y);
 
-    //   var azimuth = Math.atan2(normals[i].z, Math.sqrt(normals[i].x * normals[i].x + normals[i].y * normals[i].y));
-        // if (vertex.z > 0.04) {
-        //     normals[i].x = 0;
-        //     normals[i].y = 0;
-        //     normals[i].z = 2/3;
-        // }
-
-        // var stretch = 1 - vertex.z / 0.08 + 0.08
-        // stretch *= Math.sqrt(widthRatio) * 1/3;
-        // normals[i].x *= stretch;
-        // normals[i].y *= stretch;
-
-        normals[i].z *= vertex.z / 0.05;
         normals[i] = normals[i].normalize();
-
-        var offset = new THREE.Vector3(0.5, 0.5, 4);
-        vertex.add(normals[i].multiplyScalar(thickness).multiply(offset))
+        vertex.add(normals[i].multiplyScalar(thickness))
 
         geometry.vertices.push(vertex);
     }

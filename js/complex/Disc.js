@@ -93,6 +93,7 @@ Disc.prototype.initFaces = function () {
 
     this.circleMaxModulus = faceCenters.max;
 
+    geom.mergeVertices();
 	return geom;
 };
 
