@@ -165,6 +165,8 @@ Edge.prototype.isConvex = function () {
 
     var a1 = Complex.subtract(this.end, this.start).argument();
     var a2 = Complex.subtract(this.Circline.center(), this.start).argument();
+
+  // console.log(a1.toString() + " " + a2.toString() + " " + ((a1 - a2 + 4.0 * Math.PI) % (2.0 * Math.PI) < Math.PI).toString());
     return (a1 - a2 + 4 * Math.PI) % (2 * Math.PI) < Math.PI;
 };
 

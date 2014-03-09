@@ -1,7 +1,7 @@
 function Accuracy() {
 }
 
-Accuracy.linearTolerance = 1E-5;
+Accuracy.linearTolerance = 1E-6;
 Accuracy.angularTolerance = 1E-2;
 Accuracy.linearToleranceSquared = Accuracy.linearTolerance * Accuracy.linearTolerance;
 Accuracy.maxLength = 100;
@@ -61,7 +61,7 @@ Complex.divide = function(a, b) {
 };
 
 Complex.exp = function(z) {
-	return z.createPolar(z.modulus(), z.argument());
+	return Complex.createPolar(Math.exp(z.re), z.im);
 };
 			
 Complex.log = function(z) {

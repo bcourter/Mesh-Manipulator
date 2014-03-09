@@ -55,7 +55,17 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometryIn, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (geometryIn, time, fn) {
-    disc = new Disc(new Region(4, 5), 0.991, 666, geometryIn, fn);
+    disc = new Disc(new Region(4, 5), 0.02, 1111, geometryIn, fn);
+
+    numpoints = 360;
+    for (var i = 0; i < numpoints; i++){
+        var z = Complex.createPolar(1, Math.PI * 2 * i / numpoints);
+        var p = new THREE.Vector3(z.re, z.im, 0);
+        p = fn(p);
+        p = roll(p);
+        console.log(p.x + " " + p.y + " " + p.z);
+    }
+
     return disc.geometry;
 });
 

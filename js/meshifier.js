@@ -15,7 +15,7 @@ function init() {
     camera.position.z = 70;
 
     var cookie = getCookie("view");
-    if (cookie !== undefined) {
+    if (cookie !== undefined && false) {
         var viewdata = cookie.split(',');
 
         camera.position.x = viewdata[0];
@@ -61,7 +61,8 @@ function init() {
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
 
-        var prefix = 'resources/obj/4-5.40-';
+     //   var prefix = 'resources/obj/4-5.40-';
+        var prefix = 'resources/obj/4-5.48-lacy-';
         var extension = '.stl';
 
         var loader0 = new THREE.STLLoader();
@@ -118,17 +119,60 @@ function animate() {
 
 var circleToStrip = function(vertex) {             
     var z = new Complex(vertex.x, vertex.y);
-    z = Complex.atanh(z).scale(4 / Math.PI);  // butulov says 2 * pi, my old notes this.  what up?
+    z = Complex.atanh(z).scale(4 / Math.PI);  // butulov says 2 * pi, my old notes this.  what up?  Doesn't seem to matter yet...
 
     vertex.x = z.re;
     vertex.y = z.im;
     return vertex;
 };
 
-var rotate = function(vertex) {             
+// http://bulatov.org/math/1001/
+// w=(12)(-alog(1-az)-log(1-z))
+var circleToHeartStrip = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+    var a = Complex.createPolar(1, Math.PI / 8);
+    // z = Complex.add(
+    //         Complex.multiply(
+    //             a,
+    //             Complex.atanh(
+    //                 Complex.multiply(a,z)
+    //             )
+    //         ),
+    //         Complex.atanh(z)
+    //     );
+
+    //z = Complex.add(z, Complex.i);
+
+    var cutoff = 0.99996
+    z = Complex.subtract(
+        Complex.multiply(a, Complex.log(Complex.add(Complex.one, Complex.multiply(a.conjugate().scale(cutoff), z)))),  
+        Complex.multiply(a.conjugate(), Complex.log(Complex.subtract(Complex.one, Complex.multiply(a.scale(cutoff), z))))
+        ).scale(0.5);
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+// http://bulatov.org/math/1003/index_ring.html
+// w=exp(za)
+var stripToAnnulus = function(vertex) {             
     var z = new Complex(vertex.x, vertex.y);
 
-    var rotation = Mobius.createRotation(1/4 * Math.PI);
+    var a =  Math.PI / 2.2788701240774127 / 2.5
+    z = Complex.exp(z.scale(a));
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+
+
+var rotate = function(vertex, angle) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    var rotation = Mobius.createRotation(angle);
     z = z.transform(rotation);
 
     vertex.x = z.re;
@@ -136,24 +180,12 @@ var rotate = function(vertex) {
     return vertex;
 };
 
-var translate = function(vertex) {             
+var translate = function(vertex, point, angle) {             
     var z = new Complex(vertex.x, vertex.y);
+    var a = new Complex(point.x, point.y);
 
-    var p = 4;
-    var q = 5;
-    var sinP2 = Math.pow(Math.sin(Math.PI / p), 2);
-    var cosQ2 = Math.pow(Math.cos(Math.PI / q), 2);
-    var r = Math.sqrt(sinP2 / (cosQ2 - sinP2));
-    var d = Math.sqrt(cosQ2 / (cosQ2 - sinP2));
-    distEuclid = (d - r);
-
-    var phi = Math.PI * (0.5 - (1.0 / p + 1.0 / q));
-    var polar = Complex.createPolar(r, Math.PI - phi);
-    var p1 = Complex.add(new Complex(d, 0), polar);
-
-    var translation = Mobius.createDiscAutomorphism(new Complex(-p1.modulus(), 0), 3/10 * Math.PI);
-  //  var translation = Mobius.createDiscAutomorphism(p1, 0);
-    z = z.transform(translation);
+    var translation = Mobius.createDiscAutomorphism(a, angle);
+    z = z.transform(translation).conjugate();
 
     vertex.x = z.re;
     vertex.y = z.im;
@@ -163,12 +195,34 @@ var translate = function(vertex) {
 var offset = 0.25 / 25.4 / 0.13;
 var offsetZOnly = 0.5;
 var roll = function(vertex) {         
+    var n = 2.8;
+    var sign = vertex.z > 0 ? 1 : -1;
+    if (vertex.z * sign < 0.01)
+        sign = 0;
+
+    var period = 1.1394350620387064 * 4;
+    var radius = n * period / 2 / Math.PI;
+
+    var thickness = offset * offsetZOnly ;  //tiara
+
+    var phi = vertex.x / radius;
+    var dist = radius + offset/3*0 + vertex.z / 2;
+    vertex.z = dist * Math.cos(phi);
+    vertex.x = dist * Math.sin(phi);
+
+ //   vertex.z = vertex.x * 1/Math.tan(Math.asin(vertex.x / radius));
+    return vertex;
+};
+
+
+var rollRing = function(vertex) {         
     var n = 4;
     var sign = 1;
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
 
-    var thickness = offset * offsetZOnly * 2;
+ //   var thickness = offset * offsetZOnly * 2; // ring
+    var thickness = offset * offsetZOnly ;  //tiara
 
     var bottomScale = 0.2;
     var radiusOffset = 0;
@@ -197,6 +251,7 @@ var roll = function(vertex) {
  //   vertex.z = vertex.x * 1/Math.tan(Math.asin(vertex.x / radius));
     return vertex;
 };
+
 
 var scale = function(vertex) {         
     vertex.multiplyScalar(0.13);
@@ -253,15 +308,32 @@ function render() {
     	} 
 
     	else if (settings.isHyperbolic.checked) {
+            var p = 4;
+            var q = 5;
+            var sinP2 = Math.pow(Math.sin(Math.PI / p), 2);
+            var cosQ2 = Math.pow(Math.cos(Math.PI / q), 2);
+            var r = Math.sqrt(sinP2 / (cosQ2 - sinP2));
+            var d = Math.sqrt(cosQ2 / (cosQ2 - sinP2));
+            distEuclid = (d - r);
+
+            var phi = Math.PI * (0.5 - (1.0 / p + 1.0 / q));
+            var polar = Complex.createPolar(r, Math.PI - phi);
+            var p1 = Complex.add(new Complex(d, 0), polar);
+
             geometry = toolHyperbolic.method(objGeometry, time, function(p) {
-                p = rotate(p);
-                p = translate(p);
-                p = circleToStrip(p);
+                p = rotate(p, 1/4 * Math.PI);
+                p = translate(p, new THREE.Vector3(-p1.modulus(), 0, 0), 3/10 * Math.PI);
+                p = translate(p, new THREE.Vector3(0, -0.1, 0), Math.PI);
+             //   p = circleToStrip(p);
+             //  p = rotate(p, 1/2 * Math.PI);
+                p = p.add(new THREE.Vector3(0, 0.1, 0));
+             //   p = stripToAnnulus(p);
+             p = circleToHeartStrip(p);
                 return p;
             } );
 
             geometry = toolFunction.method(geometry, roll);
-            geometry = toolOffset.method(geometry, thickness);
+            geometry = toolOffset.method(geometry, thickness/2);
 
             //geometry = toolFunction.method(geometry, scale);
         	// geometry = toolIdentity.method(geometry);

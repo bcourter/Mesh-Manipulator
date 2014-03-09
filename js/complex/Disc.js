@@ -1,10 +1,10 @@
-function Disc(region, circleLimit, maxRegions, geometry, fn) {
+function Disc(region, sizeLimit, maxRegions, geometry, fn) {
     this.region = region;
-    this.circleLimit = circleLimit;
+    this.sizeLimit = sizeLimit;
     this.maxRegions = maxRegions;
 
     this.circleMaxModulus;
-    this.radiusLimit = 1E-4;
+    this.radiusLimit = 1E-5;
     
     this.initialFace = Face.create(region, geometry); //.transform(Mobius.createDiscAutomorphism(new Complex([0.001, 0.001]), 0));
     this.initialFace = this.initialFace.transform(Mobius.identity);
@@ -43,30 +43,25 @@ Disc.prototype.initFaces = function () {
             //       if (face.edgeCenters[i].magnitudeSquared > 0.9) 
             //          continue;
 
-            // if (c.radiusSquared() < this.radiusLimit)
-            //     continue;
-
             var mobius = edge.Circline.asMobius();
             var image = face.conjugate().transform(mobius);
 
-      //      if (image.center.modulusSquared() > this.circleLimit)
-      //         continue;
+            var faceCenter = this.fn(new THREE.Vector3(face.center.re, face.center.im, 0));
+            var imageCenter = this.fn(new THREE.Vector3(image.center.re, image.center.im, 0));
+            var r = faceCenter.sub(imageCenter).length();
 
-            var arg = image.center.argument();
-            if (arg <= -0.1 || arg > Math.PI + 0.1 )
-            	continue;
+            if (r < this.sizeLimit)
+                continue;
 
-            var p = new THREE.Vector3(image.center.re, image.center.im, 0);
-            p = this.fn(p);
-            if (p.x > 1.4) 
-                continue;
-            if (p.x < -0.5)
-                continue;
-            if (Math.abs(p.y) > this.circleLimit)
+            if (imageCenter.x < -0.4)
                 continue;
 
          //   if (faceCenters.contains(image.center))
           //      continue;
+
+       //     var arg = new Complex(p.x, p.y).argument();
+        //    if (arg <= -0.1 || arg > Math.P/3 + 0.1 )
+        //        continue;
 
             var halt = false
             for (var j = 0; j < faceCenters.length; j++) {
@@ -77,9 +72,9 @@ Disc.prototype.initFaces = function () {
                 continue;
 
             var n = 0;
-            if (Math.abs(p.y) > 0.45)
+            if (r < this.sizeLimit * 16)
                 n = 1;
-            if (Math.abs(p.y) > 0.75)
+            if (r < this.sizeLimit * 5)
                 n = 2;
 
             THREE.GeometryUtils.merge(geom, image.geometry[n]);
