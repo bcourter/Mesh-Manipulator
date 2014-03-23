@@ -81,6 +81,13 @@ Complex.tanh = function(z) {
 };
 
 
+Complex.sqrt = function(z) {
+	var modulus = z.modulus();
+	var gamma = Math.sqrt((z.re + modulus) / 2);
+	var delta = (z.im > 1 ? 1 : -1) * Math.sqrt((-z.re + modulus) / 2);
+	return new Complex(gamma, delta);
+};
+
 			// // For perfect band, use: pos = (4.0 / pi) * cAtanh(pos);
 			// return 0.5 * (cLog(one + z) - cLog(one - z));
 Complex.atanh = function(z) {
@@ -89,16 +96,23 @@ Complex.atanh = function(z) {
 		Complex.log(Complex.subtract(Complex.one, z))
 		).scale(0.5);
 };
-// Complex.atanh = function(z) {
-// 	return Complex.log(
-// 		Complex.divide(
-// 			Complex.add(Complex.one, z),
-// 			Complex.add(Complex.one, z.negative())
-// 		)).multiplyScalar(0.5);
-// };			
-			// vec2 cSin(in vec2 z) {
-			// 	return 0.5 * cMultiply(i, exp(cMultiply(i, z)) - exp(cMultiply(-1.0 * i, z)));
-			// }
+
+Complex.asinh = function(z) {
+	return Complex.log(Complex.add(z,
+		Complex.sqrt(
+			Conplex.add(Complex.multiply(z, z), Complex.one)
+	 	)
+	));
+}
+
+Complex.acosh = function(z) {
+	return Complex.log(Complex.add(z,
+		Complex.multiply(
+			Complex.sqrt(Complex.subtract(z, Complex.one)),
+			Complex.sqrt(Complex.subtract(z, Complex.one))
+		)
+	));
+}
 
 
 Complex.transformArray = function (original, mobius) {

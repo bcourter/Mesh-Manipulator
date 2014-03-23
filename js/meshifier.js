@@ -61,8 +61,8 @@ function init() {
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
 
-     //   var prefix = 'resources/obj/4-5.40-';
-        var prefix = 'resources/obj/4-5.48-lacy-';
+        var prefix = 'resources/obj/4-5.37-';
+      //  var prefix = 'resources/obj/4-5.48-lacy-';
         var extension = '.stl';
 
         var loader0 = new THREE.STLLoader();
@@ -159,11 +159,12 @@ var circleToHeartStrip = function(vertex) {
 var stripToAnnulus = function(vertex) {             
     var z = new Complex(vertex.x, vertex.y);
 
-    var a =  Math.PI / 2.2788701240774127 / 2.5
+    var a =  Math.PI / 2.2788701240774127 / 2
     z = Complex.exp(z.scale(a));
 
     vertex.x = z.re;
     vertex.y = z.im;
+ //   vertex.z = vertex.z + Complex.exp(z.scale(a * 2)).re;
     return vertex;
 };
 
@@ -174,6 +175,50 @@ var rotate = function(vertex, angle) {
 
     var rotation = Mobius.createRotation(angle);
     z = z.transform(rotation);
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+var squarify = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    z = Complex.sqrt(Complex.divide(
+            Complex.multiply(
+                Complex.i,
+                Complex.subtract(Complex.one, z)
+            ),
+            Complex.add(z, Complex.one)
+        ));
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+
+
+var halfplane = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    z = Complex.divide(
+            Complex.multiply(
+                Complex.i,
+                Complex.subtract(Complex.one, z)
+            ),
+            Complex.add(z, Complex.one)
+        );
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    return vertex;
+};
+
+var halfstrip = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    z = Complex.acosh(z);
 
     vertex.x = z.re;
     vertex.y = z.im;
@@ -323,17 +368,27 @@ function render() {
             geometry = toolHyperbolic.method(objGeometry, time, function(p) {
                 p = rotate(p, 1/4 * Math.PI);
                 p = translate(p, new THREE.Vector3(-p1.modulus(), 0, 0), 3/10 * Math.PI);
-                p = translate(p, new THREE.Vector3(0, -0.1, 0), Math.PI);
-             //   p = circleToStrip(p);
-             //  p = rotate(p, 1/2 * Math.PI);
-                p = p.add(new THREE.Vector3(0, 0.1, 0));
-             //   p = stripToAnnulus(p);
-             p = circleToHeartStrip(p);
+
+        //        p = p.multiplyScalar(0.99);
+                p = circleToStrip(p);
+
+                // Annulus
+         //       p = circleToStrip(p);
+         //       p = rotate(p, 1/2 * Math.PI);
+        //        p = stripToAnnulus(p);
+
+            // Tiara
+            //    p = translate(p, new THREE.Vector3(0, -0.1, 0), Math.PI);
+            //    p = p.add(new THREE.Vector3(0, 0.1, 0));
+            //    p = circleToHeartStrip(p);
                 return p;
             } );
 
-            geometry = toolFunction.method(geometry, roll);
-            geometry = toolOffset.method(geometry, thickness/2);
+            // Tiara
+            // geometry = toolFunction.method(geometry, roll);
+            // geometry = toolOffset.method(geometry, -thickness/2);
+            
+          //   geometry = toolOffset.method(geometry, -thickness);
 
             //geometry = toolFunction.method(geometry, scale);
         	// geometry = toolIdentity.method(geometry);
