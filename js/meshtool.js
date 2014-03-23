@@ -55,7 +55,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometryIn, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (geometryIn, time, fn) {
-    disc = new Disc(new Region(4, 5), 0.02, 555, geometryIn, fn);
+    disc = new Disc(new Region(4, 5), 0.03, 555, geometryIn, fn);
 
     numpoints = 360;
     for (var i = 0; i < numpoints; i++){
@@ -63,7 +63,7 @@ var toolHyperbolic = new MeshTool("Hyperbolic", function (geometryIn, time, fn) 
         var p = new THREE.Vector3(z.re, z.im, 0);
         p = fn(p);
         p = roll(p);
-        console.log(p.x + " " + p.y + " " + p.z);
+    //    console.log(p.x + " " + p.y + " " + p.z);
     }
 
     return disc.geometry;
@@ -113,8 +113,12 @@ var toolOffset = new MeshTool("Offset", function (geometryIn, thickness) {
         var vertex = vertices[i].clone();
         var widthRatio = Math.abs(vertex.y);
 
-        normals[i] = normals[i].normalize();
-        vertex.add(normals[i].multiplyScalar(thickness))
+        if (normals[i] !== undefined) {
+            normals[i] = normals[i].normalize();
+            vertex.add(normals[i].multiplyScalar(thickness))
+        } else {
+            var test = 0;
+        }
 
         geometry.vertices.push(vertex);
     }

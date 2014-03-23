@@ -61,7 +61,8 @@ function init() {
         this.hyperbolic = document.getElementById("hyperbolicPanel");
     };
 
-        var prefix = 'resources/obj/4-5.37-';
+      //  var prefix = 'resources/obj/4-5.37-';
+        var prefix = 'resources/obj/4-5.40-';
       //  var prefix = 'resources/obj/4-5.48-lacy-';
         var extension = '.stl';
 
@@ -239,8 +240,7 @@ var translate = function(vertex, point, angle) {
 
 var offset = 0.25 / 25.4 / 0.13;
 var offsetZOnly = 0.5;
-var roll = function(vertex) {         
-    var n = 2.8;
+var roll = function(vertex, n) {         
     var sign = vertex.z > 0 ? 1 : -1;
     if (vertex.z * sign < 0.01)
         sign = 0;
@@ -260,34 +260,32 @@ var roll = function(vertex) {
 };
 
 
-var rollRing = function(vertex) {         
-    var n = 4;
-    var sign = 1;
+var rollRing = function(vertex, n, sign, scale) {         
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
 
- //   var thickness = offset * offsetZOnly * 2; // ring
-    var thickness = offset * offsetZOnly ;  //tiara
+    var thickness = offset * offsetZOnly * 2; // ring
+ //   var thickness = offset * offsetZOnly ;  //tiara
 
     var bottomScale = 0.2;
     var radiusOffset = 0;
-    if (sign == -1) {
-        if (vertex.z < -0.02) {
-            radiusOffset = thickness;
-        } else {
-            radiusOffset = 0;
-        }
-    }
+    // if (sign == -1) {
+    //     if (vertex.z < -0.02) {
+    //         radiusOffset = thickness;
+    //     } else {
+    //         radiusOffset = 0;
+    //     }
+    // }
 
-    if (sign == 1) {
-        if (vertex.z < -0.02) {
-            radiusOffset = -thickness;
-        } else {
-            radiusOffset = bottomScale * thickness;
-        }
-    }
+    // if (sign == 1) {
+    //     if (vertex.z < -0.02) {
+    //         radiusOffset = -thickness;
+    //     } else {
+    //         radiusOffset = bottomScale * thickness;
+    //     }
+    // }
 
-    var depth = vertex.z * Math.cos(vertex.y * Math.PI / 2);
+    var depth = vertex.z * Math.cos(vertex.y * Math.PI / 2) * scale;
     var phi = vertex.x / radius;
     var dist = radius + sign * depth * 2 + radiusOffset;
     vertex.z = dist * Math.cos(phi);
@@ -359,7 +357,7 @@ function render() {
             var cosQ2 = Math.pow(Math.cos(Math.PI / q), 2);
             var r = Math.sqrt(sinP2 / (cosQ2 - sinP2));
             var d = Math.sqrt(cosQ2 / (cosQ2 - sinP2));
-            distEuclid = (d - r);
+            distEuclid = d - r;
 
             var phi = Math.PI * (0.5 - (1.0 / p + 1.0 / q));
             var polar = Complex.createPolar(r, Math.PI - phi);
@@ -369,8 +367,8 @@ function render() {
                 p = rotate(p, 1/4 * Math.PI);
                 p = translate(p, new THREE.Vector3(-p1.modulus(), 0, 0), 3/10 * Math.PI);
 
-        //        p = p.multiplyScalar(0.99);
                 p = circleToStrip(p);
+                p = rollRing(p, 6, -1, 1.5);
 
                 // Annulus
          //       p = circleToStrip(p);
@@ -383,6 +381,13 @@ function render() {
             //    p = circleToHeartStrip(p);
                 return p;
             } );
+
+            geometry = toolOffset.method(geometry, thickness);
+
+            var period = 1.1394350620387064 * 4;
+            var radius = 5 * period / 2 / Math.PI;
+            geometry = toolFunction.method(geometry, function(p) { return p.multiplyScalar(1 / radius / 1.05); });  // import as cm
+
 
             // Tiara
             // geometry = toolFunction.method(geometry, roll);
@@ -477,7 +482,7 @@ THREE.saveToObj = function (object3d) {
 
 			for (i = 0; i < geometry.vertices.length; i++) {
 				var vector = new THREE.Vector3(geometry.vertices[i].x, geometry.vertices[i].y, geometry.vertices[i].z);
-				mesh.matrixWorld.multiplyVector3(vector);
+				vector.applyMatrix4(mesh.matrixWorld);
 
 				s += 'v ' + (vector.x) + ' ' +
 				vector.y + ' ' +

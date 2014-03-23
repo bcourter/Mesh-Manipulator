@@ -74,7 +74,7 @@ Disc.prototype.initFaces = function () {
             var n = 0;
             if (r < this.sizeLimit * 16)
                 n = 1;
-            if (r < this.sizeLimit * 5)
+            if (r < this.sizeLimit * 8)
                 n = 2;
 
             THREE.GeometryUtils.merge(geom, image.geometry[n]);
