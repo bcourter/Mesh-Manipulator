@@ -53,8 +53,8 @@ Disc.prototype.initFaces = function () {
             if (r < this.sizeLimit)
                 continue;
 
-            // if (imageCenter.x < -0.4)
-            //     continue;
+             if (imageCenter.x < -0.5)
+                 continue;
 
          //   if (faceCenters.contains(image.center))
           //      continue;

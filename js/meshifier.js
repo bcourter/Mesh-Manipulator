@@ -269,21 +269,21 @@ var rollRing = function(vertex, n, sign, scale) {
 
     var bottomScale = 0.2;
     var radiusOffset = 0;
-    // if (sign == -1) {
-    //     if (vertex.z < -0.02) {
-    //         radiusOffset = thickness;
-    //     } else {
-    //         radiusOffset = 0;
-    //     }
-    // }
+    if (sign == -1) {
+        if (vertex.z < -0.02) {
+            radiusOffset = thickness;
+        } else {
+            radiusOffset = 0;
+        }
+    }
 
-    // if (sign == 1) {
-    //     if (vertex.z < -0.02) {
-    //         radiusOffset = -thickness;
-    //     } else {
-    //         radiusOffset = bottomScale * thickness;
-    //     }
-    // }
+    if (sign == 1) {
+        if (vertex.z < -0.02) {
+            radiusOffset = -thickness;
+        } else {
+            radiusOffset = bottomScale * thickness;
+        }
+    }
 
     var depth = vertex.z * Math.cos(vertex.y * Math.PI / 2) * scale;
     var phi = vertex.x / radius;
@@ -382,12 +382,11 @@ function render() {
                 return p;
             } );
 
-            geometry = toolOffset.method(geometry, thickness);
+            geometry = toolOffset.method(geometry, thickness * 0.9);
 
             var period = 1.1394350620387064 * 4;
-            var radius = 5 * period / 2 / Math.PI;
+            var radius = 5 * period / 2 / Math.PI;  // don't change - this is the reference
             geometry = toolFunction.method(geometry, function(p) { return p.multiplyScalar(1 / radius / 1.05); });  // import as cm
-
 
             // Tiara
             // geometry = toolFunction.method(geometry, roll);
