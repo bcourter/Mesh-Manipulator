@@ -62,8 +62,8 @@ function init() {
     };
 
       //  var prefix = 'resources/obj/4-5.37-';
-        var prefix = 'resources/obj/4-5.40-';
-      //  var prefix = 'resources/obj/4-5.48-lacy-';
+      //  var prefix = 'resources/obj/4-5.40-';
+        var prefix = 'resources/obj/4-5.48-lacy-';
         var extension = '.stl';
 
         var loader0 = new THREE.STLLoader();
@@ -165,6 +165,22 @@ var stripToAnnulus = function(vertex) {
 
     vertex.x = z.re;
     vertex.y = z.im;
+ //   vertex.z = vertex.z + Complex.exp(z.scale(a * 2)).re;
+    return vertex;
+};
+
+var stripToAnnulusZ = function(vertex) {             
+    var z = new Complex(vertex.x, vertex.y);
+
+    var a =  Math.PI / 2.2788701240774127 / 2.5;
+    z = Complex.exp(z.scale(a));
+
+    vertex.x = z.re;
+    vertex.y = z.im;
+    var s = Math.cos(z.argument() * 2.5 ) * 0.2;
+    vertex.z += s;
+//    vertex.z += );
+   // vertex.z += (Math.atan2(z.im, z.re));
  //   vertex.z = vertex.z + Complex.exp(z.scale(a * 2)).re;
     return vertex;
 };
@@ -369,13 +385,14 @@ function render() {
                 p = rotate(p, 1/4 * Math.PI);
                 p = translate(p, new THREE.Vector3(-p1.modulus(), 0, 0), 3/10 * Math.PI);
 
-                p = circleToStrip(p);
-                p = rollRing(p, 6, -1, 1.5);
+           //     p = circleToStrip(p);
+           //     p = rollRing(p, 6, -1, 1.5);
 
-                // Annulus
-         //       p = circleToStrip(p);
-         //       p = rotate(p, 1/2 * Math.PI);
-        //        p = stripToAnnulus(p);
+           //     Annulus
+               p = circleToStrip(p);
+               p = rotate(p, 1/2 * Math.PI);
+           //    p = stripToAnnulus(p);
+               p = stripToAnnulusZ(p);
 
             // Tiara
             //    p = translate(p, new THREE.Vector3(0, -0.1, 0), Math.PI);
@@ -384,11 +401,15 @@ function render() {
                 return p;
             } );
 
-            geometry = toolOffset.method(geometry, thickness * 0.9);
+             geometry = toolOffset.method(geometry, -0.007);
 
-            var period = 1.1394350620387064 * 4;
-            var radius = 5 * period / 2 / Math.PI;  // don't change - this is the reference
-            geometry = toolFunction.method(geometry, function(p) { return p.multiplyScalar(1 / radius / 1.05); });  // import as cm
+            // ring
+            // geometry = toolOffset.method(geometry, thickness * 0.9);
+            // geometry = toolOffset.method(geometry, thickness * 0.9);
+
+            // var period = 1.1394350620387064 * 4;
+            // var radius = 5 * period / 2 / Math.PI;  // don't change - this is the reference
+            // geometry = toolFunction.method(geometry, function(p) { return p.multiplyScalar(1 / radius / 1.05); });  // import as cm
 
             // Tiara
             // geometry = toolFunction.method(geometry, roll);

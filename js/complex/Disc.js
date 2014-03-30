@@ -68,7 +68,7 @@ Disc.prototype.initFaces = function () {
             if (r < this.sizeLimit)
                 continue;
 
-             if (imageCenter.x < -0.6)
+             if (imageCenter.x < -0.1 || imageCenter.y > 0.1)
                  continue;
 
          //   if (faceCenters.contains(image.center))
@@ -87,9 +87,9 @@ Disc.prototype.initFaces = function () {
                 continue;
 
             var n = 0;
-            if (r < this.sizeLimit * 60)
+            if (r < this.sizeLimit * 25)
                 n = 1;
-            if (r < this.sizeLimit * 30)
+            if (r < this.sizeLimit * 10)
                 n = 2;
 
             THREE.GeometryUtils.merge(geom, image.geometry[n]);
