@@ -264,7 +264,7 @@ var rollRing = function(vertex, n, sign, scale) {
     var period = 1.1394350620387064 * 4;
     var radius = n * period / 2 / Math.PI;
 
-    var thickness = offset * offsetZOnly * 2; // ring
+    var thickness = offset * offsetZOnly * 2.5; // ring
  //   var thickness = offset * offsetZOnly ;  //tiara
 
     var bottomScale = 0.2;
@@ -283,6 +283,8 @@ var rollRing = function(vertex, n, sign, scale) {
         } else {
             radiusOffset = bottomScale * thickness;
         }
+
+        radiusOffset += thickness;
     }
 
     var depth = vertex.z * Math.cos(vertex.y * Math.PI / 2) * scale;

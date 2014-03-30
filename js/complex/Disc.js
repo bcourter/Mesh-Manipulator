@@ -50,10 +50,25 @@ Disc.prototype.initFaces = function () {
             var imageCenter = this.fn(new THREE.Vector3(image.center.re, image.center.im, 0));
             var r = faceCenter.sub(imageCenter).length();
 
+            // var averageVector = new THREE.Vector3(0, 0, 0);
+            // for (var j = 0; j < image.edges.length; j++) {
+            //     var ev = image.edges[j].start;
+            //     averageVector = averageVector.add(this.fn(new THREE.Vector3(ev.re, ev.im, 0)));
+            // }
+            // averageVector = averageVector.multiplyScalar(1/image.edges.length)
+
+            // var averageRadius = 0;
+            // for (var j = 0; j < image.edges.length; j++) {
+            //     var ev = image.edges[j].start;
+            //     averageRadius = averageVector.sub(this.fn(new THREE.Vector3(ev.re, ev.im, 0))).length();
+            // }
+            // averageRadius /= image.edges.length;
+            // console.log(averageRadius);
+
             if (r < this.sizeLimit)
                 continue;
 
-             if (imageCenter.x < -0.5)
+             if (imageCenter.x < -0.6)
                  continue;
 
          //   if (faceCenters.contains(image.center))
@@ -72,9 +87,9 @@ Disc.prototype.initFaces = function () {
                 continue;
 
             var n = 0;
-            if (r < this.sizeLimit * 16)
+            if (r < this.sizeLimit * 60)
                 n = 1;
-            if (r < this.sizeLimit * 8)
+            if (r < this.sizeLimit * 30)
                 n = 2;
 
             THREE.GeometryUtils.merge(geom, image.geometry[n]);
