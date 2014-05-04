@@ -103,7 +103,6 @@ Face.prototype.transform = function (mobius) {
     		newVertices[i] = Complex.createFromVector3(vertices[i]).transform(mobius).toVector3();
     		var x = newVertices[i].x;
     		var y = newVertices[i].y;
-    		var r = Math.sqrt(x * x + y * y);
     		newVertices[i].z = vertices[i].z;
     	}
     	

@@ -57,6 +57,10 @@ Complex.multiply = function(a, b) {
 
 Complex.divide = function(a, b) {
 	var automorphy = b.re * b.re + b.im * b.im;
+
+	if (Accuracy.lengthIsZero(automorphy))
+		console.log("automorphy zero");
+	
 	return new Complex((a.re * b.re + a.im * b.im) / automorphy, (a.im * b.re - a.re * b.im) / automorphy);
 };
 

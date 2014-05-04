@@ -32,6 +32,9 @@ Circline.prototype.transform = function(mobius) {
 		),
 		c
 	);
+
+	//console.log(hermitian.a.re + " " + hermitian.c.re + " " +  hermitian.c.im + " " + hermitian.d.re);
+
 	return Circline.create(hermitian.a.re, hermitian.c, hermitian.d.re);
 };
 

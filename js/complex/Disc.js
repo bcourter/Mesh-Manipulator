@@ -45,6 +45,7 @@ Disc.prototype.initFaces = function () {
 
             var mobius = edge.Circline.asMobius();
             var image = face.conjugate().transform(mobius);
+            console.log(image.center.re + ", " + image.center.im);
 
             var faceCenter = this.fn(new THREE.Vector3(face.center.re, face.center.im, 0));
             var imageCenter = this.fn(new THREE.Vector3(image.center.re, image.center.im, 0));
@@ -68,8 +69,8 @@ Disc.prototype.initFaces = function () {
             if (r < this.sizeLimit)
                 continue;
 
-             if (imageCenter.x < -0.1 || imageCenter.y > 0.1)
-                 continue;
+    //         if (imageCenter.x < -0.1 || imageCenter.y > 0.1)
+    //             continue;
 
          //   if (faceCenters.contains(image.center))
           //      continue;
@@ -80,11 +81,12 @@ Disc.prototype.initFaces = function () {
 
             var halt = false
             for (var j = 0; j < faceCenters.length; j++) {
-                if (Complex.equals(faceCenters[j], image.center))
+                if (Complex.equals(faceCenters[j], image.center)) {
                     halt = true;
+                    break;
+                }
             }
-            if (halt)
-                continue;
+            if (halt) continue;
 
             var n = 0;
             if (r < this.sizeLimit * 25)
