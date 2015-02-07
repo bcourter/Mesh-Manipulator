@@ -63,7 +63,7 @@ function init() {
 
       //  var prefix = 'resources/obj/4-5.37-';
       //  var prefix = 'resources/obj/4-5.40-';
-        var prefix = 'resources/obj/4-5.48-lacy-';
+        var prefix = 'resources/obj/4-5.39-';
         var extension = '.stl';
 
         var loader0 = new THREE.STLLoader();
@@ -117,6 +117,22 @@ function animate() {
     controls.update();
     //stats.update();
 }
+
+var circleToSphere = function(vertex) {
+    var radiusSquared = vertex.x * vertex.x + vertex.y * vertex.y;
+   // var radius = Math.sqrt(radiusSquared);       
+    var p = new THREE.Vector3(
+        2 * vertex.x / (1 + radiusSquared),
+        2 * vertex.y / (1 + radiusSquared),
+        (-1 + radiusSquared) / (1 + radiusSquared)
+    );
+
+  //  var pradius = Math.sqrt(p.x * p.x + p.y * p.y);
+  //  var theta = Math.acos(pradius);
+  //  var normal = new THREE.Vector3(p.x, p.y, pradius*Math.sin(theta));
+
+    return p.add(p.clone().multiplyScalar(-vertex.z * (1-radiusSquared)));
+};
 
 var circleToStrip = function(vertex) {             
     var z = new Complex(vertex.x, vertex.y);
@@ -385,14 +401,18 @@ function render() {
                 p = rotate(p, 1/4 * Math.PI);
                 p = translate(p, new THREE.Vector3(-p1.modulus(), 0, 0), 3/10 * Math.PI);
 
+
+                p = circleToSphere(p);
+
+
            //     p = circleToStrip(p);
            //     p = rollRing(p, 6, -1, 1.5);
 
            //     Annulus
-               p = circleToStrip(p);
-               p = rotate(p, 1/2 * Math.PI);
+           //    p = circleToStrip(p);
+           //    p = rotate(p, 1/2 * Math.PI);
            //    p = stripToAnnulus(p);
-               p = stripToAnnulusZ(p);
+            //   p = stripToAnnulusZ(p);
 
             // Tiara
             //    p = translate(p, new THREE.Vector3(0, -0.1, 0), Math.PI);
@@ -401,7 +421,7 @@ function render() {
                 return p;
             } );
 
-             geometry = toolOffset.method(geometry, -0.007);
+     //        geometry = toolOffset.method(geometry, -0.007);
 
             // ring
             // geometry = toolOffset.method(geometry, thickness * 0.9);

@@ -51,6 +51,9 @@ Disc.prototype.initFaces = function () {
             var imageCenter = this.fn(new THREE.Vector3(image.center.re, image.center.im, 0));
             var r = faceCenter.sub(imageCenter).length();
 
+            if (imageCenter.x < 0)
+                continue;
+
             // var averageVector = new THREE.Vector3(0, 0, 0);
             // for (var j = 0; j < image.edges.length; j++) {
             //     var ev = image.edges[j].start;
@@ -89,9 +92,9 @@ Disc.prototype.initFaces = function () {
             if (halt) continue;
 
             var n = 0;
-            if (r < this.sizeLimit * 25)
+            if (r < this.sizeLimit * 60)
                 n = 1;
-            if (r < this.sizeLimit * 10)
+            if (r < this.sizeLimit * 20)
                 n = 2;
 
             THREE.GeometryUtils.merge(geom, image.geometry[n]);
