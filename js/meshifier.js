@@ -422,6 +422,10 @@ function render() {
             } );
 
      //        geometry = toolOffset.method(geometry, -0.007);
+    //        geometry = toolFilterFaceCenters.method(geometry, function(v) { return Math.atan2(v.y, v.x) >= Math.PI -Math.PI/5 - 2*Math.PI/5 });
+        //    geometry = toolFilterFaceCenters.method(geometry, function(v) { return (v.y <= 0) && (v.x <= 0) } );
+            geometry = toolFilterFaceCenters.method(geometry, function(v) { return v.y > 0 && v.x > 0; } );
+            geometry = toolScaleSweep.method(geometry, 1-1/18);
 
             // ring
             // geometry = toolOffset.method(geometry, thickness * 0.9);
@@ -505,15 +509,33 @@ function render() {
 function saveObj() {
     var op = THREE.saveToObj(basicMeshFromGeometry(geometry));
 
-    var newWindow = window.open("");
-    newWindow.document.write(op);
+    // var newWindow = window.open("");
+    // newWindow.document.write(op);
+
+    saveData(op, "meshifier.obj");
 
     //console.log(op);
 }
 
+var saveData = (function () {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    return function (data, fileName) {
+        var blob = new Blob([data], {type: "text/object3d"}),
+            url = window.URL.createObjectURL(blob);
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    };
+}());
+
 THREE.saveToObj = function (object3d) {
     var s = '';
 	var offset = 1;
+   // var cr = '<br />';
+    var cr = '\n';
 
     object3d.traverse(function (child) {
         if (child instanceof THREE.Mesh) {
@@ -528,20 +550,20 @@ THREE.saveToObj = function (object3d) {
 
 				s += 'v ' + (vector.x) + ' ' +
 				vector.y + ' ' +
-				vector.z + '<br />';
+				vector.z + cr;
 			}
 
 			for (i = 0; i < geometry.faces.length; i++) {
 				s += 'f ' +
 				    (geometry.faces[i].a + offset) + ' ' +
 				    (geometry.faces[i].b + offset) + ' ' +
-				    (geometry.faces[i].c + offset)
-				;
+				    (geometry.faces[i].c + offset);
 
 				if (geometry.faces[i].d !== undefined) {
 				    s += ' ' + (geometry.faces[i].d + offset);
 				}
-				s += '<br />';
+
+				s += cr;
 			}
 
 			offset += geometry.vertices.length;

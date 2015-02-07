@@ -55,7 +55,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometryIn, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (geometryIn, time, fn) {
-    disc = new Disc(new Region(4, 5), 0.004, 1111, geometryIn, fn);
+    disc = new Disc(new Region(4, 5), 0.002, 4444, geometryIn, fn);
 
     numpoints = 360;
     for (var i = 0; i < numpoints; i++){
@@ -80,6 +80,63 @@ var toolFunction = new MeshTool("Function", function (geometryIn, fn) {
     var faces = geometryIn.faces;
     for (var i = 0, il = faces.length; i < il; i++) {
         geometry.faces.push(faces[i]);
+    }
+
+    return geometry;
+});
+
+var toolFilterVertices = new MeshTool("FilterVertices", function (geometryIn, fn) {
+    var geometry = new THREE.Geometry();
+    var vertices = geometryIn.vertices;
+    for (var i = 0, il = vertices.length; i < il; i++) {
+        var vertex = vertices[i].clone();
+        geometry.vertices.push(vertex);
+    }
+
+    var faces = geometryIn.faces;
+    for (var i = 0, il = faces.length; i < il; i++) {
+        var face = faces[i];
+
+        if (
+                fn(vertices[face.a]) &&
+                fn(vertices[face.b]) &&
+                fn(vertices[face.c]) &&
+                ((face instanceof THREE.Face4) ? fn(vertices[face.d]) : true)
+            )
+            geometry.faces.push(faces[i]);
+    }
+
+    return geometry;
+});
+
+var toolFilterFaceCenters = new MeshTool("FilterFaceCenters", function (geometryIn, fn) {
+    var geometry = new THREE.Geometry();
+    var vertices = geometryIn.vertices;
+    for (var i = 0, il = vertices.length; i < il; i++) {
+        var vertex = vertices[i].clone();
+        geometry.vertices.push(vertex);
+    }
+
+    var faces = geometryIn.faces;
+    for (var i = 0, il = faces.length; i < il; i++) {
+        var face = faces[i];
+
+        var faceCenter = new THREE.Vector3()
+                .add(vertices[face.a])
+                .add(vertices[face.b])
+                .add(vertices[face.c]);
+
+        var divisor = 3;
+
+        if (face instanceof THREE.Face4) {
+            faceCenter.add(fn(vertices[face.d]));
+            divisor = 4;
+        }
+
+        faceCenter.multiplyScalar(1/divisor);
+
+        if (fn(faceCenter))
+            geometry.faces.push(faces[i]);
     }
 
     return geometry;
@@ -127,6 +184,98 @@ var toolOffset = new MeshTool("Offset", function (geometryIn, thickness) {
     for (var i = 0, il = faces.length; i < il; i++) {
         geometry.faces.push(faces[i]);
     }
+
+    return geometry;
+});
+
+
+
+var toolScaleSweep = new MeshTool("ScaleSweep", function (geometryIn, ratio) {
+    var consolidated = geometryIn.clone();
+
+    var geometry = new THREE.Geometry();
+    var geometryOffset = new THREE.Geometry();
+    var geometrySwept = new THREE.Geometry();
+    consolidated.computeFaceNormals();
+    consolidated.computeVertexNormals();
+    var vertices = consolidated.vertices;
+    var faces = consolidated.faces;
+    var edges = [];
+    var edgeList = [];
+
+    var addEdge = function(edges, a, b, face) {
+        if (a == b) 
+            console.log("Edge with same two verices!")
+
+        var min = Math.min(a, b);
+        var max = Math.max(a, b);
+
+        if (typeof edges[max][min] == 'undefined') {
+            edges[max][min] = {a: max, b: min, faces: [face]};
+            edgeList.push(edges[max][min]);
+        }
+        else
+            edges[max][min].faces.push(face);
+    }
+
+    for (var v = 0; v < vertices.length; v++) {
+        edges [v] = [];
+    }
+
+    for (var f = 0, fl = faces.length; f < fl; f++ ) {
+        face = faces[f];
+
+        addEdge(edges, face.a, face.b, face);
+        addEdge(edges, face.b, face.c, face);
+
+        if ( face instanceof THREE.Face3 ) {
+            addEdge(edges, face.c, face.a, face);
+        } else if ( face instanceof THREE.Face4 ) {
+            addEdge(edges, face.c, face.d, face);
+            addEdge(edges, face.d, face.a, face);
+        }
+    }
+
+    for (var i = 0, il = vertices.length; i < il; i++) {
+        var vertex = vertices[i].clone();
+
+        geometry.vertices.push(vertex);
+        geometryOffset.vertices.push(vertex.clone().multiplyScalar(ratio));
+    }
+
+    var faces = consolidated.faces;
+    for (var i = 0, il = faces.length; i < il; i++) {
+        geometry.faces.push(faces[i]);
+        geometryOffset.faces.push(faces[i]);
+    }
+
+    var laminarEdges = [];
+    for (var i = 0; i < edgeList.length; i++) {
+        if (edgeList[i].faces.length == 1)
+            laminarEdges.push(edgeList[i]);
+    }
+
+    for (var i = 0; i < laminarEdges.length; i++) {
+        var edge = laminarEdges[i];
+        var a1 = geometry.vertices[edge.a];
+        var b1 = geometry.vertices[edge.b];
+        var a2 = geometryOffset.vertices[edge.a];
+        var b2 = geometryOffset.vertices[edge.b];
+
+        var offset = geometrySwept.vertices.length;
+        geometrySwept.vertices[offset] = a1.clone();
+        geometrySwept.vertices[offset + 1] = b1.clone();
+        geometrySwept.vertices[offset + 2] = a2.clone();
+        geometrySwept.vertices[offset + 3] = b2.clone();
+
+        geometrySwept.faces.push(new THREE.Face3(offset, offset + 1, offset + 2));
+        geometrySwept.faces.push(new THREE.Face3(offset + 1, offset + 2, offset + 3));
+    }
+
+    geometrySwept.mergeVertices();
+    THREE.GeometryUtils.merge(geometry, geometrySwept);
+    THREE.GeometryUtils.merge(geometry, geometryOffset);
+    geometry.mergeVertices();
 
     return geometry;
 });

@@ -45,13 +45,13 @@ Disc.prototype.initFaces = function () {
 
             var mobius = edge.Circline.asMobius();
             var image = face.conjugate().transform(mobius);
-            console.log(image.center.re + ", " + image.center.im);
+         //   console.log(image.center.re + ", " + image.center.im);
 
             var faceCenter = this.fn(new THREE.Vector3(face.center.re, face.center.im, 0));
             var imageCenter = this.fn(new THREE.Vector3(image.center.re, image.center.im, 0));
             var r = faceCenter.sub(imageCenter).length();
 
-            if (imageCenter.x < 0)
+            if (imageCenter.x < -0.3 || imageCenter.y < -0.1)
                 continue;
 
             // var averageVector = new THREE.Vector3(0, 0, 0);
@@ -92,9 +92,9 @@ Disc.prototype.initFaces = function () {
             if (halt) continue;
 
             var n = 0;
-            if (r < this.sizeLimit * 60)
+            if (r < this.sizeLimit * 40)
                 n = 1;
-            if (r < this.sizeLimit * 20)
+            if (r < this.sizeLimit * 15)
                 n = 2;
 
             THREE.GeometryUtils.merge(geom, image.geometry[n]);
