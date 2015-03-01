@@ -51,8 +51,8 @@ Disc.prototype.initFaces = function () {
             var imageCenter = this.fn(new THREE.Vector3(image.center.re, image.center.im, 0));
             var r = faceCenter.sub(imageCenter).length();
 
-            if (imageCenter.x < -0.3 || imageCenter.y < -0.1)
-                continue;
+       // lamp     if (imageCenter.x < -0.3 || imageCenter.y < -0.1)
+        //        continue;
 
             // var averageVector = new THREE.Vector3(0, 0, 0);
             // for (var j = 0; j < image.edges.length; j++) {

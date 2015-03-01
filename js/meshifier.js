@@ -402,8 +402,11 @@ function render() {
                 p = translate(p, new THREE.Vector3(-p1.modulus(), 0, 0), 3/10 * Math.PI);
 
 
-                p = circleToSphere(p);
+// lamp                p = circleToSphere(p);
+           p = halfplane(p);
+           p = halfstrip(p);
 
+         //   console.log(p.x + "," + p.y + "," + p.z)
 
            //     p = circleToStrip(p);
            //     p = rollRing(p, 6, -1, 1.5);
@@ -424,8 +427,9 @@ function render() {
      //        geometry = toolOffset.method(geometry, -0.007);
     //        geometry = toolFilterFaceCenters.method(geometry, function(v) { return Math.atan2(v.y, v.x) >= Math.PI -Math.PI/5 - 2*Math.PI/5 });
         //    geometry = toolFilterFaceCenters.method(geometry, function(v) { return (v.y <= 0) && (v.x <= 0) } );
-            geometry = toolFilterFaceCenters.method(geometry, function(v) { return v.y > 0 && v.x > 0; } );
-            geometry = toolScaleSweep.method(geometry, 1-1/18);
+   //         geometry = toolFilterFaceCenters.method(geometry, function(v) { return (v.x > 0) && (v.y > 0.01) } );
+// LAMP            geometry = toolFilterFaceCenters.method(geometry, function(v) { return v.y > 0 && v.x > 0; } );
+// LAMP            geometry = toolScaleSweep.method(geometry, 1-1/18);
 
             // ring
             // geometry = toolOffset.method(geometry, thickness * 0.9);

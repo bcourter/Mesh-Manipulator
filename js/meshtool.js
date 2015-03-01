@@ -55,7 +55,7 @@ var tool4dExplode = new MeshTool("4d Explode", function (geometryIn, time) {
 });
 
 var toolHyperbolic = new MeshTool("Hyperbolic", function (geometryIn, time, fn) {
-    disc = new Disc(new Region(4, 5), 0.002, 4444, geometryIn, fn);
+    disc = new Disc(new Region(4, 5), 0.002, 6666, geometryIn, fn);
 
     numpoints = 360;
     for (var i = 0; i < numpoints; i++){

@@ -85,12 +85,41 @@ Complex.tanh = function(z) {
 };
 
 
-Complex.sqrt = function(z) {
+Complex.sqrtOLD = function(z) {
 	var modulus = z.modulus();
 	var gamma = Math.sqrt((z.re + modulus) / 2);
 	var delta = (z.im > 1 ? 1 : -1) * Math.sqrt((-z.re + modulus) / 2);
 	return new Complex(gamma, delta);
 };
+
+// https://pavpanchekha.com/blog/casio-mathjs.html
+Complex.sqrt = function(x) {
+	var r = Math.sqrt(x.re * x.re + x.im * x.im);
+	var re, im;
+
+	if (x.re >= 0) {
+	  re = 0.5 * Math.sqrt(2.0 * (r + x.re));
+	}
+	else {
+	  re = Math.abs(x.im) / Math.sqrt(2 * (r - x.re));
+	}
+
+	if (x.re <= 0) {
+	  im = 0.5 * Math.sqrt(2.0 * (r - x.re));
+	}
+	else {
+	  im = Math.abs(x.im) / Math.sqrt(2 * (r + x.re));
+	}
+
+	if (x.im >= 0) {
+	  return new Complex(re, im);
+	}
+	else {
+	  return new Complex(re, -im);
+	}
+};
+
+
 
 			// // For perfect band, use: pos = (4.0 / pi) * cAtanh(pos);
 			// return 0.5 * (cLog(one + z) - cLog(one - z));
@@ -112,7 +141,7 @@ Complex.asinh = function(z) {
 Complex.acosh = function(z) {
 	return Complex.log(Complex.add(z,
 		Complex.multiply(
-			Complex.sqrt(Complex.subtract(z, Complex.one)),
+			Complex.sqrt(Complex.add(z, Complex.one)),
 			Complex.sqrt(Complex.subtract(z, Complex.one))
 		)
 	));
